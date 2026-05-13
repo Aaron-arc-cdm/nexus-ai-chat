@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>NEXUS · Altered Carbon Voice Suite</title>
+  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Nexus%20Carbon%22,%22short_name%22:%22Nexus%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23050b14%22,%22theme_color%22:%22%2300f0ff%22}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', 'Poppins', sans-serif;
+      background: radial-gradient(circle at 10% 20%, #0a0f1e, #03060c);
+      color: #eef5ff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Background grid */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: 
+        linear-gradient(rgba(0, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Main app container */
+    .app-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Hamburger menu (drawer) */
+    .drawer {
+      position: fixed;
+      top: 0;
+      left: -320px;
+      width: 300px;
+      height: 100%;
+      background: rgba(8, 12, 22, 0.95);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(0, 240, 255, 0.3);
+      transition: left 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+    }
+    .drawer.open {
+      left: 0;
+    }
+    .drawer-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .drawer-header h3 {
+      font-size: 1.2rem;
+      color: #00f0ff;
+    }
+    .close-drawer {
+      background: none;
+      border: none;
+      color: #00f0ff;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .drawer-section {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .drawer-section h4 {
+      margin-bottom: 12px;
+      color: #b77cff;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+    }
+    .drawer-section label {
+      display: block;
+      font-size: 0.75rem;
+      margin-top: 8px;
+      margin-bottom: 4px;
+    }
+    .drawer-section select, .drawer-section input, .drawer-section button {
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 8px;
+      border-radius: 20px;
+      background: #0f1119;
+      border: 1px solid #2d3042;
+      color: white;
+    }
+    .drawer-section button {
+      background: #1e2a4a;
+      cursor: pointer;
+    }
+    .voice-preview {
+      background: #0a0f1e;
+      margin-top: 8px;
+      font-size: 0.7rem;
+      text-align: center;
+    }
+
+    /* Main chat area */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin-left: 0;
+      transition: margin-left 0.3s;
+    }
+    .app-header {
+      background: rgba(12, 20, 30, 0.55);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.25);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .menu-btn {
+      background: none;
+      border: none;
+      color: #00f0ff;
+      font-size: 1.6rem;
+      cursor: pointer;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .input-area {
+      background: rgba(12, 20, 30, 0.55);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(0, 240, 255, 0.25);
+      padding: 12px 20px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .input-wrapper {
+      flex: 1;
+      display: flex;
+      background: #0f1119;
+      border-radius: 48px;
+      border: 1px solid #2d3042;
+    }
+    textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 10px 16px;
+      color: white;
+      resize: none;
+      font-family: inherit;
+      outline: none;
+    }
+    .send-btn, .mic-btn {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      border: none;
+      margin: 5px;
+      border-radius: 40px;
+      width: 42px;
+      height: 42px;
+      color: white;
+      cursor: pointer;
+    }
+    /* Message bubbles (same neon style) */
+    .message { display: flex; gap: 12px; max-width: 85%; animation: fadeSlide 0.2s; }
+    .message.user { align-self: flex-end; flex-direction: row-reverse; }
+    .bubble {
+      background: rgba(18, 25, 40, 0.7);
+      backdrop-filter: blur(4px);
+      border-radius: 28px;
+      padding: 10px 16px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+    }
+    .message.user .bubble { background: rgba(0, 200, 220, 0.15); border-color: #00f0ff; }
+    .tool-buttons { display: flex; gap: 8px; margin-top: 8px; }
+    .tool-buttons i { cursor: pointer; background: #0f1119; padding: 4px; border-radius: 20px; }
+    footer { text-align: center; font-size: 0.65rem; padding: 4px; color: #5f658c; background: rgba(0,0,0,0.5); }
+    @media (max-width: 700px) { .message { max-width: 95%; } }
+  </style>
+</head>
+<body>
+
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <h3><i class="fas fa-sliders-h"></i> Nexus Control</h3>
+    <button class="close-drawer" id="closeDrawerBtn"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="drawer-section">
+    <h4><i class="fas fa-key"></i> API & Persona</h4>
+    <label>Gemini API Key</label>
+    <input type="password" id="apiKeyInput" placeholder="Paste free Gemini key">
+    <label>AI Personality</label>
+    <select id="personalitySelect">
+      <option value="default">Nexus Core</option>
+      <option value="dig">⚡ Dig AI Lady (Altered Carbon)</option>
+      <option value="alex">🎭 Alex Park (The Good Doctor)</option>
+      <option value="poe">🌌 Poe AI (Altered Carbon)</option>
+    </select>
+  </div>
+  <div class="drawer-section">
+    <h4><i class="fas fa-waveform"></i> Voice Tuning (Closest to characters)</h4>
+    <label>System Voice</label>
+    <select id="voiceSelect"></select>
+    <label>Pitch (0.5 - 2.0)</label>
+    <input type="range" id="voicePitch" min="0.5" max="2.0" step="0.05" value="1.0">
+    <label>Rate (0.5 - 2.0)</label>
+    <input type="range" id="voiceRate" min="0.5" max="2.0" step="0.05" value="1.0">
+    <button id="previewVoiceBtn"><i class="fas fa-play"></i> Preview voice</button>
+    <div class="voice-preview" id="voicePreviewMsg">Click preview to hear</div>
+  </div>
+  <div class="drawer-section">
+    <h4><i class="fas fa-cog"></i> Settings</h4>
+    <label><input type="checkbox" id="autoSpeakToggle" checked> Auto‑speak AI replies</label>
+    <label><input type="checkbox" id="autoScrollToggle" checked> Auto‑scroll chat</label>
+    <label><input type="checkbox" id="darkModeToggle" checked> Dark mode (neon)</label>
+    <button id="clearDataBtn" style="background:#dc2626;">⚠️ Clear all data</button>
+    <button id="exportAllSettingsBtn">📤 Export settings & chats</button>
+    <input type="file" id="importSettingsFile" accept=".json" style="display:none">
+    <button id="importSettingsBtn">📥 Import settings</button>
+  </div>
+  <div class="drawer-section">
+    <h4><i class="fas fa-tools"></i> Extra Tools</h4>
+    <button id="showTodosBtn"><i class="fas fa-list-check"></i> To‑Do List</button>
+    <button id="showNotesBtn"><i class="fas fa-sticky-note"></i> Quick Notes</button>
+  </div>
+</div>
+
+<div class="main-content">
+  <div class="app-header">
+    <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+    <div class="logo-area">
+      <i class="fas fa-microchip" style="color:#00f0ff"></i>
+      <h2>NEXUS · Carbon Voice</h2>
+    </div>
+    <div><span id="statusBadge" class="status-online"><i class="fas fa-satellite-dish"></i> Online</span></div>
+  </div>
+
+  <div class="chat-container" id="chatContainer">
+    <div class="message assistant">
+      <div class="bubble">🌀 Nexus Carbon online. <br>✨ Commands: <code>/joke</code> <code>/fact</code> <code>/define word</code> <code>/time London</code> <code>/qr text</code><br>🎤 Click mic & speak. Adjust voice in hamburger menu → Voice Tuning to match Dig / Alex / Poe.</div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <div class="input-wrapper">
+      <textarea id="userInput" placeholder="Message or /command ..."></textarea>
+      <button id="sendBtn" class="send-btn"><i class="fas fa-paper-plane"></i></button>
+      <button id="micBtn" class="mic-btn"><i class="fas fa-microphone-alt"></i></button>
+    </div>
+    <button id="speakLastBtn" class="tool-icon"><i class="fas fa-play-circle"></i></button>
+  </div>
+  <footer><i class="fas fa-robot"></i> Free: Gemini API (your key) + nearest voice approximation. Tune pitch/rate for character feel.</footer>
+</div>
+
+<script>
+  // ======================== DOM Elements ========================
+  const drawer = document.getElementById('drawer');
+  const menuBtn = document.getElementById('menuBtn');
+  const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+  const apiKeyInput = document.getElementById('apiKeyInput');
+  const personalitySelect = document.getElementById('personalitySelect');
+  const voiceSelect = document.getElementById('voiceSelect');
+  const voicePitch = document.getElementById('voicePitch');
+  const voiceRate = document.getElementById('voiceRate');
+  const previewVoiceBtn = document.getElementById('previewVoiceBtn');
+  const autoSpeakToggle = document.getElementById('autoSpeakToggle');
+  const autoScrollToggle = document.getElementById('autoScrollToggle');
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  const clearDataBtn = document.getElementById('clearDataBtn');
+  const exportAllSettingsBtn = document.getElementById('exportAllSettingsBtn');
+  const importSettingsBtn = document.getElementById('importSettingsBtn');
+  const importSettingsFile = document.getElementById('importSettingsFile');
+  const showTodosBtn = document.getElementById('showTodosBtn');
+  const showNotesBtn = document.getElementById('showNotesBtn');
+  const chatContainer = document.getElementById('chatContainer');
+  const userInput = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const micBtn = document.getElementById('micBtn');
+  const speakLastBtn = document.getElementById('speakLastBtn');
+  const statusBadge = document.getElementById('statusBadge');
+
+  // ======================== State ========================
+  let currentAbortController = null;
+  let lastAssistantMessage = "";
+  let isSpeaking = false;
+  let recognition = null;
+  let isListening = false;
+  let db;
+  let autoScroll = true;
+  let availableVoices = [];
+
+  // ======================== IndexedDB & Storage ========================
+  const DB_NAME = 'NexusCarbonDB';
+  const STORE_NAME = 'conversations';
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, 1);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => { db = request.result; resolve(db); };
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      };
+    });
+  }
+  async function saveConversation(messages) {
+    if (!db) await openDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).put({ id: 'main', messages, updated: Date.now() });
+    return tx.complete;
+  }
+  function getCurrentMessages() {
+    const messages = [];
+    document.querySelectorAll('.message').forEach(msgDiv => {
+      const role = msgDiv.classList.contains('user') ? 'user' : 'assistant';
+      const bubble = msgDiv.querySelector('.bubble');
+      if (bubble) {
+        let text = bubble.innerText;
+        text = text.replace(/Speak|Copy|Pin|Delete|Edit/g, '').trim();
+        messages.push({ role, content: text, timestamp: msgDiv.dataset.ts || Date.now() });
+      }
+    });
+    return messages;
+  }
+  async function persistMessages() { await saveConversation(getCurrentMessages()); }
+  async function loadConversation() {
+    if (!db) await openDB();
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const req = tx.objectStore(STORE_NAME).get('main');
+    return new Promise(resolve => { req.onsuccess = () => { if (req.result?.messages) renderMessagesFromArray(req.result.messages); resolve(); }; });
+  }
+  function renderMessagesFromArray(messages) {
+    chatContainer.innerHTML = '';
+    messages.forEach(msg => appendMessageElement(msg.role, msg.content, false, msg.timestamp));
+    scrollToBottom();
+  }
+
+  // ======================== UI Helpers ========================
+  function scrollToBottom() { if (autoScroll) chatContainer.scrollTop = chatContainer.scrollHeight; }
+  function showToast(msg) {
+    const t = document.createElement('div'); t.innerText = msg;
+    t.style.position = 'fixed'; t.style.bottom = '70px'; t.style.right = '20px';
+    t.style.background = 'rgba(0,0,0,0.8)'; t.style.backdropFilter = 'blur(12px)';
+    t.style.border = '1px solid #00f0ff'; t.style.borderRadius = '40px'; t.style.padding = '8px 16px';
+    t.style.zIndex = 999; t.style.fontSize = '0.8rem';
+    document.body.appendChild(t); setTimeout(() => t.remove(), 1800);
+  }
+
+  function appendMessageElement(role, text, saveToDB = true, timestamp = null) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${role}`;
+    const ts = timestamp || Date.now();
+    messageDiv.dataset.ts = ts;
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    if (role === 'assistant') {
+      bubble.innerHTML = marked.parse(text, { breaks: true, async: false });
+      bubble.querySelectorAll('pre code').forEach(bl => hljs.highlightElement(bl));
+      const tools = document.createElement('div');
+      tools.className = 'tool-buttons';
+      tools.innerHTML = `<i class="fas fa-volume-up" title="Speak"></i> <i class="fas fa-copy" title="Copy"></i> <i class="fas fa-thumbtack" title="Pin"></i>`;
+      tools.querySelector('.fa-volume-up').addEventListener('click', () => speakText(text));
+      tools.querySelector('.fa-copy').addEventListener('click', () => { navigator.clipboard.writeText(text); showToast("Copied"); });
+      tools.querySelector('.fa-thumbtack').addEventListener('click', () => togglePin(messageDiv));
+      bubble.appendChild(tools);
+      lastAssistantMessage = text;
+    } else {
+      bubble.innerText = text;
+      const actionDiv = document.createElement('div');
+      actionDiv.className = 'message-actions';
+      actionDiv.innerHTML = `<i class="fas fa-pen" title="Edit"></i> <i class="fas fa-trash" title="Delete"></i> <i class="fas fa-copy" title="Copy"></i>`;
+      actionDiv.querySelector('.fa-pen').addEventListener('click', () => editMessage(messageDiv, text));
+      actionDiv.querySelector('.fa-trash').addEventListener('click', () => deleteMessage(messageDiv));
+      actionDiv.querySelector('.fa-copy').addEventListener('click', () => { navigator.clipboard.writeText(text); showToast("Copied"); });
+      bubble.appendChild(actionDiv);
+    }
+    const timeSpan = document.createElement('div');
+    timeSpan.className = 'timestamp';
+    timeSpan.innerText = new Date(parseInt(ts)).toLocaleTimeString();
+    bubble.appendChild(timeSpan);
+    messageDiv.appendChild(bubble);
+    chatContainer.appendChild(messageDiv);
+    scrollToBottom();
+    if (saveToDB) persistMessages();
+  }
+  function deleteMessage(msgDiv) { if (confirm("Delete?")) { msgDiv.remove(); persistMessages(); } }
+  function editMessage(msgDiv, oldText) {
+    const newText = prompt("Edit:", oldText);
+    if (newText && newText.trim()) { msgDiv.querySelector('.bubble').childNodes[0].nodeValue = newText; persistMessages(); showToast("Updated"); }
+  }
+  function togglePin(msgDiv) {
+    const id = msgDiv.dataset.ts;
+    let pinned = JSON.parse(localStorage.getItem('pinnedMessages') || '[]');
+    if (pinned.includes(id)) { pinned = pinned.filter(i => i !== id); showToast("Unpinned"); }
+    else { pinned.push(id); showToast("Pinned"); }
+    localStorage.setItem('pinnedMessages', JSON.stringify(pinned));
+  }
+
+  // ======================== Voice & Speech (Tunable) ========================
+  function loadVoices() {
+    availableVoices = window.speechSynthesis.getVoices();
+    voiceSelect.innerHTML = '<option value="">Select system voice</option>';
+    availableVoices.forEach(voice => {
+      const option = document.createElement('option');
+      option.value = voice.name;
+      option.textContent = `${voice.name} (${voice.lang})`;
+      voiceSelect.appendChild(option);
+    });
+    // load saved voice name
+    const savedVoice = localStorage.getItem('voice_name');
+    if (savedVoice && [...voiceSelect.options].some(opt => opt.value === savedVoice)) voiceSelect.value = savedVoice;
+  }
+  function getSelectedVoice() {
+    const name = voiceSelect.value;
+    return availableVoices.find(v => v.name === name) || null;
+  }
+  function speakText(text) {
+    if (!window.speechSynthesis) return;
+    if (isSpeaking) window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voice = getSelectedVoice();
+    if (voice) utterance.voice = voice;
+    utterance.pitch = parseFloat(voicePitch.value);
+    utterance.rate = parseFloat(voiceRate.value);
+    utterance.onend = () => { isSpeaking = false; };
+    utterance.onstart = () => { isSpeaking = true; };
+    window.speechSynthesis.speak(utterance);
+  }
+  function stopSpeaking() { window.speechSynthesis?.cancel(); isSpeaking = false; }
+  previewVoiceBtn.addEventListener('click', () => {
+    const previewText = "This is how your current voice settings sound. Adjust pitch and rate to match Dig, Alex or Poe.";
+    speakText(previewText);
+    document.getElementById('voicePreviewMsg').innerText = "Previewing...";
+    setTimeout(() => document.getElementById('voicePreviewMsg').innerText = "Ready", 2000);
+  });
+  speakLastBtn.addEventListener('click', () => { if (lastAssistantMessage) speakText(lastAssistantMessage); });
+
+  // ======================== Free Commands ========================
+  async function fetchJoke() {
+    try { const res = await fetch('https://icanhazdadjoke.com/', { headers: { 'Accept': 'application/json' } }); const data = await res.json(); return `😂 ${data.joke}`; } catch { return "⚠️ Joke offline"; }
+  }
+  async function fetchFact() {
+    try { const res = await fetch('https://uselessfacts.jsph.pl/api/v2/facts/random'); const data = await res.json(); return `📡 ${data.text}`; } catch { return "⚠️ Fact error"; }
+  }
+  async function fetchDefinition(word) {
+    try { const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`); if(!res.ok) return `No definition for ${word}`; const data = await res.json(); return `📖 ${word}: ${data[0]?.meanings[0]?.definitions[0]?.definition}`; } catch { return "Dictionary error"; }
+  }
+  async function fetchWorldTime(tz) {
+    try { const res = await fetch(`https://worldtimeapi.org/api/timezone/${encodeURIComponent(tz)}`); if(!res.ok) return `Timezone ${tz} not found`; const data = await res.json(); return `🕒 ${tz}: ${new Date(data.datetime).toLocaleString()}`; } catch { return "Time error"; }
+  }
+  async function generateQR(text) {
+    const img = document.createElement('img');
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(text)}`;
+    img.style.maxWidth = '100px'; img.style.borderRadius = '12px';
+    return new Promise(resolve => { img.onload = () => resolve(`🔲 QR:<br>${img.outerHTML}`); img.onerror = () => resolve(`QR failed for: ${text}`); });
+  }
+  async function handleCommand(input) {
+    const lower = input.trim().toLowerCase();
+    if (lower === '/joke') return await fetchJoke();
+    if (lower === '/fact') return await fetchFact();
+    if (lower.startsWith('/define ')) return await fetchDefinition(input.slice(8).trim());
+    if (lower.startsWith('/time ')) return await fetchWorldTime(input.slice(6).trim());
+    if (lower.startsWith('/qr ')) return await generateQR(input.slice(4).trim());
+    return null;
+  }
+
+  // ======================== Gemini Streaming ========================
+  function getPersonalityPrompt(p) {
+    const prompts = {
+      default: "You are a helpful, futuristic AI.",
+      dig: "You are Dig AI Lady from Altered Carbon. Speak with mysterious, sultry digital wisdom. Use metaphors about stacks and sleeves.",
+      alex: "You are Dr. Alex Park from The Good Doctor. Empathetic, precise, kind, with analytical pauses.",
+      poe: "You are Poe AI from Altered Carbon. Charming, erudite, loyal, dramatic vintage flair."
+    };
+    return prompts[p] || prompts.default;
+  }
+  let typingDiv = null;
+  function showTyping() { if(typingDiv) typingDiv.remove(); typingDiv = document.createElement('div'); typingDiv.className = 'typing-indicator'; typingDiv.innerHTML = '<span></span><span></span><span></span><span> AI composing</span>'; chatContainer.appendChild(typingDiv); scrollToBottom(); }
+  function hideTyping() { if(typingDiv) { typingDiv.remove(); typingDiv = null; } }
+  async function sendToGeminiStream(userMessage) {
+    const apiKey = apiKeyInput.value.trim();
+    if (!apiKey) { appendMessageElement('assistant', "🔑 Please paste your Gemini API key in the hamburger menu.", true); return false; }
+    const personality = personalitySelect.value;
+    const systemPrompt = getPersonalityPrompt(personality);
+    const history = getCurrentMessages().slice(-6);
+    const contents = [{ role: "user", parts: [{ text: systemPrompt + "\nContext follows." }] }];
+    history.forEach(msg => contents.push({ role: msg.role === 'user' ? "user" : "model", parts: [{ text: msg.content }] }));
+    contents.push({ role: "user", parts: [{ text: userMessage }] });
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?key=${apiKey}&alt=sse`;
+    try {
+      if (currentAbortController) currentAbortController.abort();
+      currentAbortController = new AbortController();
+      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents, generationConfig: { temperature: 0.7, maxOutputTokens: 1024 } }), signal: currentAbortController.signal });
+      if (!response.ok) throw new Error(`API error ${response.status}`);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+      let assistantDiv = null, bubbleDiv = null;
+      hideTyping();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const jsonStr = line.slice(6);
+              if (jsonStr === '[DONE]') continue;
+              const parsed = JSON.parse(jsonStr);
+              const textPart = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (textPart) {
+                fullText += textPart;
+                if (!assistantDiv) {
+                  assistantDiv = document.createElement('div'); assistantDiv.className = 'message assistant';
+                  bubbleDiv = document.createElement('div'); bubbleDiv.className = 'bubble';
+                  assistantDiv.appendChild(bubbleDiv);
+                  chatContainer.appendChild(assistantDiv);
+                }
+                if (bubbleDiv) {
+                  bubbleDiv.innerHTML = marked.parse(fullText, { breaks: true });
+                  bubbleDiv.querySelectorAll('pre code').forEach(bl => hljs.highlightElement(bl));
+                  if (!bubbleDiv.querySelector('.tool-buttons')) {
+                    const tools = document.createElement('div'); tools.className = 'tool-buttons';
+                    tools.innerHTML = `<i class="fas fa-volume-up" title="Speak"></i> <i class="fas fa-copy" title="Copy"></i> <i class="fas fa-thumbtack" title="Pin"></i>`;
+                    tools.querySelector('.fa-volume-up').addEventListener('click', () => speakText(fullText));
+                    tools.querySelector('.fa-copy').addEventListener('click', () => { navigator.clipboard.writeText(fullText); showToast("Copied"); });
+                    tools.querySelector('.fa-thumbtack').addEventListener('click', () => togglePin(assistantDiv));
+                    bubbleDiv.appendChild(tools);
+                  }
+                  scrollToBottom();
+                }
+              }
+            } catch(e) {}
+          }
+        }
+      }
+      if (fullText) {
+        assistantDiv.dataset.ts = Date.now();
+        lastAssistantMessage = fullText;
+        if (autoSpeakToggle.checked && fullText.length > 20) speakText(fullText);
+        persistMessages();
+        return true;
+      } else throw new Error("empty");
+    } catch (err) {
+      if (err.name !== 'AbortError') { hideTyping(); appendMessageElement('assistant', `❌ Gemini error: ${err.message}`, true); }
+      return false;
+    } finally { currentAbortController = null; }
+  }
+
+  async function handleSend() {
+    let text = userInput.value.trim();
+    if (!text) return;
+    const cmdRes = await handleCommand(text);
+    if (cmdRes) {
+      appendMessageElement('assistant', cmdRes, true);
+      userInput.value = ''; userInput.style.height = 'auto';
+      return;
+    }
+    if (!apiKeyInput.value.trim()) { appendMessageElement('assistant', "🔑 Enter Gemini API key in menu.", true); return; }
+    appendMessageElement('user', text, true);
+    userInput.value = ''; userInput.style.height = 'auto';
+    showTyping();
+    await sendToGeminiStream(text);
+  }
+
+  // ======================== Speech-to-Text ========================
+  function initSpeechRecognition() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) { micBtn.disabled = true; return null; }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recog = new SpeechRecognition();
+    recog.continuous = false; recog.interimResults = true; recog.lang = 'en-US';
+    let finalTranscript = '';
+    recog.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+        else interim += event.results[i][0].transcript;
+      }
+      userInput.value = finalTranscript + interim;
+      userInput.dispatchEvent(new Event('input'));
+    };
+    recog.onend = () => {
+      micBtn.classList.remove('listening'); isListening = false;
+      if (finalTranscript.trim()) handleSend();
+      finalTranscript = '';
+    };
+    recog.onerror = () => { micBtn.classList.remove('listening'); isListening = false; showToast("Voice error"); };
+    return recog;
+  }
+  function toggleListening() {
+    if (!recognition) { recognition = initSpeechRecognition(); if (!recognition) return; }
+    if (isListening) recognition.stop();
+    else { recognition.start(); micBtn.classList.add('listening'); isListening = true; }
+  }
+  micBtn.addEventListener('click', toggleListening);
+
+  // ======================== Settings Save/Load ========================
+  function saveAllSettings() {
+    localStorage.setItem('gemini_api_key', apiKeyInput.value);
+    localStorage.setItem('personality', personalitySelect.value);
+    localStorage.setItem('voice_name', voiceSelect.value);
+    localStorage.setItem('voice_pitch', voicePitch.value);
+    localStorage.setItem('voice_rate', voiceRate.value);
+    localStorage.setItem('auto_speak', autoSpeakToggle.checked);
+    localStorage.setItem('auto_scroll', autoScrollToggle.checked);
+    localStorage.setItem('dark_mode', darkModeToggle.checked);
+  }
+  function loadAllSettings() {
+    apiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
+    personalitySelect.value = localStorage.getItem('personality') || 'default';
+    if (localStorage.getItem('voice_name')) voiceSelect.value = localStorage.getItem('voice_name');
+    voicePitch.value = localStorage.getItem('voice_pitch') || '1.0';
+    voiceRate.value = localStorage.getItem('voice_rate') || '1.0';
+    autoSpeakToggle.checked = localStorage.getItem('auto_speak') !== 'false';
+    autoScrollToggle.checked = localStorage.getItem('auto_scroll') !== 'false';
+    darkModeToggle.checked = localStorage.getItem('dark_mode') !== 'false';
+    autoScroll = autoScrollToggle.checked;
+    // dark mode apply
+    document.body.classList.toggle('dark', darkModeToggle.checked);
+  }
+  // settings UI listeners
+  autoScrollToggle.addEventListener('change', (e) => { autoScroll = e.target.checked; saveAllSettings(); });
+  autoSpeakToggle.addEventListener('change', saveAllSettings);
+  darkModeToggle.addEventListener('change', () => { document.body.classList.toggle('dark', darkModeToggle.checked); saveAllSettings(); });
+  voicePitch.addEventListener('change', saveAllSettings);
+  voiceRate.addEventListener('change', saveAllSettings);
+  voiceSelect.addEventListener('change', saveAllSettings);
+  personalitySelect.addEventListener('change', saveAllSettings);
+  apiKeyInput.addEventListener('change', saveAllSettings);
+
+  // Clear data
+  clearDataBtn.addEventListener('click', () => {
+    if (confirm("Erase ALL conversations and settings?")) {
+      localStorage.clear();
+      indexedDB.deleteDatabase(DB_NAME);
+      location.reload();
+    }
+  });
+  exportAllSettingsBtn.addEventListener('click', () => {
+    const data = {
+      settings: {
+        gemini_api_key: apiKeyInput.value,
+        personality: personalitySelect.value,
+        voice_name: voiceSelect.value,
+        voice_pitch: voicePitch.value,
+        voice_rate: voiceRate.value,
+        auto_speak: autoSpeakToggle.checked,
+        auto_scroll: autoScrollToggle.checked,
+        dark_mode: darkModeToggle.checked
+      },
+      messages: getCurrentMessages(),
+      pinned: localStorage.getItem('pinnedMessages')
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `nexus_backup_${Date.now()}.json`; a.click(); URL.revokeObjectURL(a.href);
+  });
+  importSettingsBtn.addEventListener('click', () => importSettingsFile.click());
+  importSettingsFile.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+    try {
+      const data = JSON.parse(text);
+      if (data.settings) {
+        apiKeyInput.value = data.settings.gemini_api_key || '';
+        personalitySelect.value = data.settings.personality || 'default';
+        if (data.settings.voice_name) voiceSelect.value = data.settings.voice_name;
+        voicePitch.value = data.settings.voice_pitch || '1.0';
+        voiceRate.value = data.settings.voice_rate || '1.0';
+        autoSpeakToggle.checked = data.settings.auto_speak !== false;
+        autoScrollToggle.checked = data.settings.auto_scroll !== false;
+        darkModeToggle.checked = data.settings.dark_mode !== false;
+        saveAllSettings();
+      }
+      if (data.messages && Array.isArray(data.messages)) renderMessagesFromArray(data.messages);
+      if (data.pinned) localStorage.setItem('pinnedMessages', data.pinned);
+      showToast("Import complete");
+    } catch (err) { showToast("Invalid backup file"); }
+  });
+
+  // Drawer menu
+  menuBtn.addEventListener('click', () => drawer.classList.add('open'));
+  closeDrawerBtn.addEventListener('click', () => drawer.classList.remove('open'));
+  document.addEventListener('click', (e) => { if (drawer.classList.contains('open') && !drawer.contains(e.target) && !menuBtn.contains(e.target)) drawer.classList.remove('open'); });
+
+  // Simple To-Do and Notes modals
+  function showModal(title, contentHtml) {
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed'; modal.style.top = '20%'; modal.style.left = '20%'; modal.style.width = '60%';
+    modal.style.background = '#0f1119'; modal.style.border = '1px solid #00f0ff'; modal.style.borderRadius = '32px';
+    modal.style.padding = '20px'; modal.style.zIndex = 2000; modal.style.backdropFilter = 'blur(20px)';
+    modal.innerHTML = `<h3>${title}</h3><div>${contentHtml}</div><button id="closeModalBtn" style="margin-top:12px;">Close</button>`;
+    document.body.appendChild(modal);
+    document.getElementById('closeModalBtn').onclick = () => modal.remove();
+  }
+  showTodosBtn.addEventListener('click', () => {
+    let todos = JSON.parse(localStorage.getItem('todoList') || '[]');
+    const listHtml = todos.map((t, i) => `<div><input type="checkbox" ${t.done ? 'checked' : ''} data-idx="${i}"> ${t.text} <button data-idx="${i}" class="del-todo">🗑️</button></div>`).join('');
+    const addForm = `<input type="text" id="newTodoText" placeholder="New task"><button id="addTodoBtn">Add</button>`;
+    const modalDiv = document.createElement('div');
+    modalDiv.innerHTML = `<div>${listHtml || 'No tasks'}</div>${addForm}`;
+    showModal("To-Do List", modalDiv.innerHTML);
+    // attach events after modal is shown
+    setTimeout(() => {
+      document.querySelectorAll('.del-todo').forEach(btn => btn.onclick = () => { todos.splice(parseInt(btn.dataset.idx),1); localStorage.setItem('todoList', JSON.stringify(todos)); location.reload(); });
+      document.getElementById('addTodoBtn')?.addEventListener('click', () => {
+        const newText = document.getElementById('newTodoText')?.value;
+        if(newText) { todos.push({ text: newText, done: false }); localStorage.setItem('todoList', JSON.stringify(todos)); location.reload(); }
+      });
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.onchange = (e) => { todos[e.target.dataset.idx].done = e.target.checked; localStorage.setItem('todoList', JSON.stringify(todos)); });
+    }, 100);
+  });
+  showNotesBtn.addEventListener('click', () => {
+    let notes = localStorage.getItem('quickNotes') || '';
+    const editor = `<textarea id="notesArea" rows="6" style="width:100%; background:#0a0f1e; color:white; border-radius:16px;">${notes}</textarea><button id="saveNotesBtn">Save Notes</button>`;
+    showModal("Quick Notes", editor);
+    setTimeout(() => document.getElementById('saveNotesBtn')?.addEventListener('click', () => { localStorage.setItem('quickNotes', document.getElementById('notesArea').value); showToast("Notes saved"); }), 100);
+  });
+
+  // ======================== Initialization ========================
+  window.speechSynthesis.onvoiceschanged = () => { loadVoices(); };
+  loadVoices();
+  openDB().then(() => { loadAllSettings(); loadConversation(); }).catch(() => loadAllSettings());
+  sendBtn.addEventListener('click', handleSend);
+  userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } });
+  setInterval(() => persistMessages(), 8000);
+  // online status
+  function updateOnlineStatus() { statusBadge.innerHTML = navigator.onLine ? '<i class="fas fa-satellite-dish"></i> Online' : '<i class="fas fa-hdd"></i> Offline'; }
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
+</script>
+</body>
+</html>
