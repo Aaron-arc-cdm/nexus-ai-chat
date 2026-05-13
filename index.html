@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>NEXUS AI · Gemini + Personalities + Voice (STT & TTS)</title>
+  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Nexus%20AI%22,%22short_name%22:%22Nexus%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230a0c12%22,%22theme_color%22:%22%234f46e5%22}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0c12;
+      color: #eef2ff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #1e1f2a; border-radius: 8px; }
+    ::-webkit-scrollbar-thumb { background: #3b3f5c; border-radius: 8px; }
+    .app-header {
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid #2a2c3a;
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 20;
+    }
+    .logo-area { display: flex; align-items: center; gap: 12px; }
+    .logo { background: linear-gradient(135deg, #8b5cf6, #3b82f6); width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    h1 { font-size: 1.4rem; font-weight: 600; }
+    .badge { background: #1f2232; padding: 4px 12px; border-radius: 40px; font-size: 0.7rem; }
+    .controls-row {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      background: #0f1119; padding: 12px 24px; border-bottom: 1px solid #232532;
+    }
+    .control-group { display: flex; align-items: center; gap: 8px; background: #1a1d2b; padding: 5px 12px; border-radius: 40px; }
+    .control-group label { font-size: 0.75rem; color: #a9afcf; }
+    select, input, button {
+      background: #0e101a; border: 1px solid #2d3042; color: white;
+      border-radius: 28px; padding: 6px 12px; font-size: 0.8rem;
+      cursor: pointer; transition: 0.2s;
+    }
+    select:hover, button:hover { border-color: #6c63ff; background: #191e2e; }
+    button.primary { background: #4f46e5; border: none; font-weight: 600; }
+    button.primary:hover { background: #6366f1; transform: scale(0.97); }
+    input { width: 220px; cursor: text; }
+    .api-key-input { font-family: monospace; width: 260px; }
+    .chat-container {
+      flex: 1; overflow-y: auto; padding: 20px 24px;
+      display: flex; flex-direction: column; gap: 18px;
+      scroll-behavior: smooth;
+    }
+    .message { display: flex; gap: 14px; max-width: 85%; animation: fadeSlide 0.2s ease-out; }
+    .message.user { align-self: flex-end; flex-direction: row-reverse; }
+    .message.assistant { align-self: flex-start; }
+    .avatar { width: 38px; height: 38px; border-radius: 100px; background: #2a2d44; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .message.user .avatar { background: #4f46e5; }
+    .bubble { background: #171a28; border-radius: 26px; padding: 12px 18px; line-height: 1.5; font-size: 0.95rem; box-shadow: 0 2px 6px rgba(0,0,0,0.3); word-wrap: break-word; max-width: 100%; }
+    .message.user .bubble { background: #2d2f42; border-bottom-right-radius: 8px; }
+    .message.assistant .bubble { background: #121520; border-bottom-left-radius: 8px; border-left: 2px solid #4f46e5; }
+    .bubble pre { margin: 10px 0; border-radius: 12px; overflow-x: auto; }
+    .tool-buttons { display: flex; gap: 8px; margin-top: 8px; opacity: 0.7; }
+    .tool-buttons i { font-size: 0.7rem; cursor: pointer; background: #24273a; padding: 5px; border-radius: 20px; }
+    .typing-indicator { display: flex; gap: 5px; padding: 10px 18px; background: #121520; width: fit-content; border-radius: 40px; }
+    .typing-indicator span { width: 8px; height: 8px; background: #8b9eff; border-radius: 50%; animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:0.3;transform:scale(0.8);}50%{opacity:1;transform:scale(1.2);} }
+    .input-area {
+      background: #0f1119; border-top: 1px solid #232532;
+      padding: 16px 24px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    }
+    .input-wrapper { flex: 1; display: flex; background: #1a1d2b; border-radius: 48px; border: 1px solid #2f3348; transition: 0.2s; }
+    .input-wrapper:focus-within { border-color: #6c63ff; }
+    textarea { flex: 1; background: transparent; border: none; padding: 12px 18px; color: white; font-size: 0.9rem; resize: none; font-family: inherit; outline: none; max-height: 120px; }
+    .send-btn, .mic-btn { background: #4f46e5; border: none; margin: 6px; border-radius: 40px; width: 42px; height: 42px; font-size: 1.2rem; cursor: pointer; }
+    .mic-btn { background: #2d3e6e; }
+    .mic-btn.listening { background: #dc2626; animation: pulseRed 1s infinite; }
+    @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(220,38,38,0.7); } 100% { box-shadow: 0 0 0 8px rgba(220,38,38,0); } }
+    .voice-controls { display: flex; gap: 8px; }
+    .tool-icon { background: #1e2130; padding: 10px; border-radius: 40px; font-size: 1rem; cursor: pointer; }
+    footer { font-size: 0.7rem; text-align: center; padding: 6px; color: #5f658c; }
+    @media (max-width: 700px) { .controls-row { flex-direction: column; align-items: stretch; } .message { max-width: 95%; } .api-key-input { width: 100%; } }
+  </style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="logo-area"><div class="logo"><i class="fas fa-brain"></i></div><h1>NEXUS·AI</h1><div class="badge"><i class="fas fa-microphone-alt"></i> STT + TTS</div></div>
+  <div><i class="fas fa-database"></i> Offline PWA ready</div>
+</div>
+
+<div class="controls-row">
+  <div class="control-group"><i class="fas fa-key"></i><input type="password" id="apiKeyInput" class="api-key-input" placeholder="Gemini API Key (free tier)" autocomplete="off"></div>
+  <div class="control-group"><i class="fas fa-robot"></i><select id="personalitySelect"><option value="default">✨ Default Assistant</option><option value="dig">⚡ Dig AI Lady (Altered Carbon)</option><option value="alex">🎭 Alex Park (The Good Doctor)</option><option value="poe">🌌 Poe AI (Altered Carbon)</option></select></div>
+  <div class="control-group"><i class="fas fa-waveform"></i><select id="voiceSelect"><option value="dig_female">🗣️ Dig AI Lady (female)</option><option value="alex_male">🎙️ Alex Park (male)</option><option value="poe_male">🌠 Poe AI (male)</option></select></div>
+  <div class="control-group"><label><i class="fas fa-volume-up"></i> Auto-speak</label><input type="checkbox" id="autoSpeakToggle" checked></div>
+  <button id="clearChatBtn" class="tool-icon"><i class="fas fa-trash-alt"></i> Clear</button>
+  <button id="exportChatBtn" class="tool-icon"><i class="fas fa-download"></i> Export TXT</button>
+  <button id="importChatBtn" class="tool-icon"><i class="fas fa-upload"></i> Import</button>
+</div>
+
+<div class="chat-container" id="chatContainer">
+  <div class="message assistant">
+    <div class="avatar"><i class="fas fa-robot"></i></div>
+    <div class="bubble">✨ Nexus Core active. Set your Gemini key, pick a personality, and try the <i class="fas fa-microphone"></i> mic button for voice input!<br>Real streaming, offline storage, and AI voices included.</div>
+  </div>
+</div>
+
+<div class="input-area">
+  <div class="input-wrapper">
+    <textarea id="userInput" placeholder="Type or speak (click mic) ..." rows="1"></textarea>
+    <button id="sendBtn" class="send-btn"><i class="fas fa-paper-plane"></i></button>
+    <button id="micBtn" class="mic-btn" title="Speech to text (free)"><i class="fas fa-microphone"></i></button>
+  </div>
+  <div class="voice-controls">
+    <button id="speakLastBtn" class="tool-icon" title="Speak last AI response"><i class="fas fa-play-circle"></i></button>
+    <button id="stopSpeakingBtn" class="tool-icon" title="Stop speech"><i class="fas fa-stop"></i></button>
+  </div>
+</div>
+<footer><i class="fas fa-shield-alt"></i> 100% free: Gemini API (your key) + browser STT/TTS. Works offline after first load.</footer>
+
+<script>
+  // DOM elements
+  const chatContainer = document.getElementById('chatContainer');
+  const userInput = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const micBtn = document.getElementById('micBtn');
+  const apiKeyInput = document.getElementById('apiKeyInput');
+  const personalitySelect = document.getElementById('personalitySelect');
+  const voiceSelect = document.getElementById('voiceSelect');
+  const autoSpeakToggle = document.getElementById('autoSpeakToggle');
+  const clearChatBtn = document.getElementById('clearChatBtn');
+  const exportChatBtn = document.getElementById('exportChatBtn');
+  const importChatBtn = document.getElementById('importChatBtn');
+  const speakLastBtn = document.getElementById('speakLastBtn');
+  const stopSpeakingBtn = document.getElementById('stopSpeakingBtn');
+
+  let currentAbortController = null;
+  let lastAssistantMessage = "";
+  let isSpeaking = false;
+  let recognition = null;
+  let isListening = false;
+
+  // ---------- STT (Speech-to-Text, free, no API key) ----------
+  function initSpeechRecognition() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.warn("STT not supported");
+      micBtn.disabled = true;
+      micBtn.title = "STT not supported in this browser";
+      return null;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recog = new SpeechRecognition();
+    recog.continuous = false;
+    recog.interimResults = false;
+    recog.lang = 'en-US';
+    recog.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      userInput.value = transcript;
+      userInput.dispatchEvent(new Event('input'));
+      // auto-send after short delay
+      setTimeout(() => { if (userInput.value.trim()) handleSend(); }, 100);
+      micBtn.classList.remove('listening');
+      isListening = false;
+    };
+    recog.onerror = (e) => {
+      console.log("STT error", e.error);
+      micBtn.classList.remove('listening');
+      isListening = false;
+      if (e.error !== 'no-speech') showTempTooltip("🎙️ Could not recognize, try again");
+    };
+    recog.onend = () => {
+      micBtn.classList.remove('listening');
+      isListening = false;
+    };
+    return recog;
+  }
+
+  function toggleListening() {
+    if (!recognition) {
+      recognition = initSpeechRecognition();
+      if (!recognition) return;
+    }
+    if (isListening) {
+      recognition.stop();
+      micBtn.classList.remove('listening');
+      isListening = false;
+    } else {
+      try {
+        recognition.start();
+        micBtn.classList.add('listening');
+        isListening = true;
+      } catch(e) { showTempTooltip("Mic busy, try again"); }
+    }
+  }
+  micBtn.addEventListener('click', toggleListening);
+
+  // ---------- LocalStorage & IndexedDB (offline) ----------
+  let db;
+  const DB_NAME = 'NexusChatDB';
+  const STORE_NAME = 'conversations';
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, 1);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => { db = request.result; resolve(db); };
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      };
+    });
+  }
+
+  async function saveConversationToIndexedDB(messages) {
+    if (!db) await openDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.put({ id: 'main_chat', messages: messages, updated: Date.now() });
+    return tx.complete;
+  }
+
+  function getCurrentMessages() {
+    const messages = [];
+    document.querySelectorAll('.message').forEach(div => {
+      const role = div.classList.contains('user') ? 'user' : 'assistant';
+      const bubble = div.querySelector('.bubble');
+      if (bubble) {
+        let text = bubble.innerText;
+        if (text.includes('Speak this')) text = text.split('Speak this')[0];
+        messages.push({ role, content: text.trim() });
+      }
+    });
+    return messages.slice(-50);
+  }
+
+  async function persistMessages() { await saveConversationToIndexedDB(getCurrentMessages()); }
+
+  async function loadConversationFromIndexedDB() {
+    if (!db) await openDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const getReq = store.get('main_chat');
+      getReq.onsuccess = () => {
+        if (getReq.result?.messages?.length) renderMessagesFromArray(getReq.result.messages);
+        resolve();
+      };
+      getReq.onerror = () => resolve();
+    });
+  }
+
+  function renderMessagesFromArray(messages) {
+    chatContainer.innerHTML = '';
+    messages.forEach(msg => appendMessageElement(msg.role, msg.content, false));
+    scrollToBottom();
+  }
+
+  function appendMessageElement(role, text, saveToDB = true) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${role}`;
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.innerHTML = role === 'user' ? '<i class="fas fa-user-astronaut"></i>' : '<i class="fas fa-gem"></i>';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    if (role === 'assistant') {
+      bubble.innerHTML = marked.parse(text, { breaks: true, async: false });
+      bubble.querySelectorAll('pre code').forEach(bl => hljs.highlightElement(bl));
+      const tools = document.createElement('div');
+      tools.className = 'tool-buttons';
+      tools.innerHTML = `<i class="fas fa-volume-up" title="Speak this message"></i> <i class="fas fa-copy" title="Copy text"></i>`;
+      tools.querySelector('.fa-volume-up').addEventListener('click', () => speakText(text));
+      tools.querySelector('.fa-copy').addEventListener('click', () => { navigator.clipboard.writeText(text); showTempTooltip("Copied!"); });
+      bubble.appendChild(tools);
+      lastAssistantMessage = text;
+    } else {
+      bubble.innerText = text;
+      const copyIcon = document.createElement('i');
+      copyIcon.className = "fas fa-copy";
+      copyIcon.style.cssText = "font-size:0.65rem; margin-left:12px; opacity:0.5; cursor:pointer";
+      copyIcon.addEventListener('click', () => { navigator.clipboard.writeText(text); showTempTooltip("Copied!"); });
+      bubble.appendChild(copyIcon);
+    }
+    messageDiv.appendChild(avatar);
+    messageDiv.appendChild(bubble);
+    chatContainer.appendChild(messageDiv);
+    scrollToBottom();
+    if (saveToDB) persistMessages();
+  }
+
+  function showTempTooltip(msg) {
+    const tip = document.createElement('div');
+    tip.innerText = msg;
+    tip.style.position = 'fixed'; tip.style.bottom = '80px'; tip.style.right = '20px';
+    tip.style.background = '#2d2f5e'; tip.style.padding = '6px 14px'; tip.style.borderRadius = '30px';
+    tip.style.fontSize = '12px'; tip.style.zIndex = 999; tip.style.backdropFilter = 'blur(8px)';
+    document.body.appendChild(tip);
+    setTimeout(() => tip.remove(), 1500);
+  }
+
+  function scrollToBottom() { chatContainer.scrollTop = chatContainer.scrollHeight; }
+
+  // Personality & voice
+  function getPersonalityPrompt(personality) {
+    const prompts = {
+      default: "You are a helpful, intelligent, friendly AI assistant. Provide clear, insightful responses.",
+      dig: "You are Dig AI Lady from Altered Carbon. Speak with a calm, mysterious, sultry digital wisdom. Use futuristic metaphors, reference stacks and sleeves.",
+      alex: "You are Dr. Alex Park from The Good Doctor. Brilliant, empathetic, socially nuanced surgical resident. Respond with precision and kindness.",
+      poe: "You are Poe AI, sentient hotel AI from Altered Carbon. Charming, erudite, loyal, dramatic vintage flair. Speak like an old-world butler with deep hospitality."
+    };
+    return prompts[personality] || prompts.default;
+  }
+
+  function getVoiceForPreset(preset) {
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) return null;
+    if (preset === 'dig_female') return voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('female')) || voices[0];
+    if (preset === 'alex_male') return voices.find(v => v.lang === 'en-US' && (v.name.toLowerCase().includes('male') || v.name.includes('Google UK'))) || voices[1];
+    if (preset === 'poe_male') return voices.find(v => v.lang === 'en-GB' || v.name.toLowerCase().includes('daniel')) || voices[2];
+    return voices[0];
+  }
+
+  function speakText(text) {
+    if (!window.speechSynthesis) return;
+    if (isSpeaking) window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voiceObj = getVoiceForPreset(voiceSelect.value);
+    if (voiceObj) utterance.voice = voiceObj;
+    utterance.rate = 0.98;
+    utterance.pitch = voiceSelect.value === 'dig_female' ? 1.1 : (voiceSelect.value === 'alex_male' ? 1.0 : 0.95);
+    utterance.onend = () => { isSpeaking = false; };
+    utterance.onstart = () => { isSpeaking = true; };
+    window.speechSynthesis.speak(utterance);
+  }
+  function stopSpeaking() { window.speechSynthesis?.cancel(); isSpeaking = false; }
+  stopSpeakingBtn.addEventListener('click', stopSpeaking);
+  speakLastBtn.addEventListener('click', () => { if (lastAssistantMessage) speakText(lastAssistantMessage); });
+
+  // Gemini streaming
+  let typingDiv = null;
+  function showTyping() { if(typingDiv) typingDiv.remove(); typingDiv = document.createElement('div'); typingDiv.className = 'typing-indicator'; typingDiv.innerHTML = '<span></span><span></span><span></span><span style="margin-left:6px;">AI composing</span>'; chatContainer.appendChild(typingDiv); scrollToBottom(); }
+  function hideTyping() { if(typingDiv) { typingDiv.remove(); typingDiv = null; } }
+
+  async function sendToGeminiStream(userMessage) {
+    const apiKey = apiKeyInput.value.trim();
+    if (!apiKey) { appendMessageElement('assistant', "🔑 Please enter your Gemini API key.", true); return false; }
+    const personality = personalitySelect.value;
+    const systemPrompt = getPersonalityPrompt(personality);
+    const history = getCurrentMessages().slice(-6);
+    const contents = [{ role: "user", parts: [{ text: systemPrompt + "\n\nPrevious conversation for context." }] }];
+    history.forEach(msg => { contents.push({ role: msg.role === 'user' ? "user" : "model", parts: [{ text: msg.content }] }); });
+    contents.push({ role: "user", parts: [{ text: userMessage }] });
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?key=${apiKey}&alt=sse`;
+    try {
+      if (currentAbortController) currentAbortController.abort();
+      currentAbortController = new AbortController();
+      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents, generationConfig: { temperature: 0.7, maxOutputTokens: 1024 } }), signal: currentAbortController.signal });
+      if (!response.ok) throw new Error(`API error ${response.status}`);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+      letassistantDiv = null;
+      let bubbleDiv = null;
+      hideTyping();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const jsonStr = line.slice(6);
+              if (jsonStr === '[DONE]') continue;
+              const parsed = JSON.parse(jsonStr);
+              const textPart = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (textPart) {
+                fullText += textPart;
+                if (!assistantDiv) {
+                  assistantDiv = document.createElement('div'); assistantDiv.className = 'message assistant';
+                  const avatarDiv = document.createElement('div'); avatarDiv.className = 'avatar'; avatarDiv.innerHTML = '<i class="fas fa-gem"></i>';
+                  bubbleDiv = document.createElement('div'); bubbleDiv.className = 'bubble';
+                  assistantDiv.appendChild(avatarDiv); assistantDiv.appendChild(bubbleDiv);
+                  chatContainer.appendChild(assistantDiv);
+                }
+                if (bubbleDiv) {
+                  bubbleDiv.innerHTML = marked.parse(fullText, { breaks: true });
+                  bubbleDiv.querySelectorAll('pre code').forEach(bl => hljs.highlightElement(bl));
+                  if (!bubbleDiv.querySelector('.tool-buttons')) {
+                    const tools = document.createElement('div'); tools.className = 'tool-buttons';
+                    tools.innerHTML = `<i class="fas fa-volume-up" title="Speak this"></i> <i class="fas fa-copy" title="Copy"></i>`;
+                    tools.querySelector('.fa-volume-up').addEventListener('click', () => speakText(fullText));
+                    tools.querySelector('.fa-copy').addEventListener('click', () => { navigator.clipboard.writeText(fullText); showTempTooltip("Copied!"); });
+                    bubbleDiv.appendChild(tools);
+                  }
+                  scrollToBottom();
+                }
+              }
+            } catch(e) {}
+          }
+        }
+      }
+      if (fullText) {
+        lastAssistantMessage = fullText;
+        if (autoSpeakToggle.checked && fullText.length > 20) speakText(fullText);
+        persistMessages();
+        return true;
+      } else throw new Error("empty response");
+    } catch (err) {
+      if (err.name !== 'AbortError') { hideTyping(); appendMessageElement('assistant', `❌ Gemini error: ${err.message}`, true); }
+      return false;
+    } finally { currentAbortController = null; }
+  }
+
+  async function handleSend() {
+    const text = userInput.value.trim();
+    if (!text) return;
+    if (!apiKeyInput.value.trim()) { appendMessageElement('assistant', "🔑 Set Gemini API key first.", true); return; }
+    appendMessageElement('user', text, true);
+    userInput.value = '';
+    userInput.style.height = 'auto';
+    showTyping();
+    await sendToGeminiStream(text);
+  }
+
+  sendBtn.addEventListener('click', handleSend);
+  userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } });
+  userInput.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = Math.min(100, this.scrollHeight) + 'px'; });
+
+  clearChatBtn.addEventListener('click', async () => {
+    if (confirm('Clear all messages?')) {
+      chatContainer.innerHTML = '';
+      appendMessageElement('assistant', "✨ Conversation cleared.", true);
+      persistMessages();
+      stopSpeaking();
+    }
+  });
+  exportChatBtn.addEventListener('click', () => {
+    const msgs = getCurrentMessages();
+    const txt = msgs.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n');
+    const blob = new Blob([txt], { type: 'text/plain' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `nexus_chat_${Date.now()}.txt`; a.click(); URL.revokeObjectURL(a.href);
+  });
+  importChatBtn.addEventListener('click', () => {
+    const input = document.createElement('input'); input.type = 'file'; input.accept = '.txt,.json';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      const lines = text.split('\n');
+      const newMessages = [];
+      for (let line of lines) {
+        if (line.startsWith('USER:')) newMessages.push({ role: 'user', content: line.slice(6).trim() });
+        else if (line.startsWith('ASSISTANT:')) newMessages.push({ role: 'assistant', content: line.slice(11).trim() });
+      }
+      if (newMessages.length) { renderMessagesFromArray(newMessages); persistMessages(); }
+      else showTempTooltip("Invalid format, use export format");
+    };
+    input.click();
+  });
+
+  // Save settings
+  function saveSettings() {
+    localStorage.setItem('gemini_api_key', apiKeyInput.value);
+    localStorage.setItem('personality', personalitySelect.value);
+    localStorage.setItem('voice_preset', voiceSelect.value);
+    localStorage.setItem('auto_speak', autoSpeakToggle.checked);
+  }
+  apiKeyInput.addEventListener('change', saveSettings);
+  personalitySelect.addEventListener('change', saveSettings);
+  voiceSelect.addEventListener('change', saveSettings);
+  autoSpeakToggle.addEventListener('change', saveSettings);
+  function loadSettings() {
+    const savedKey = localStorage.getItem('gemini_api_key');
+    if (savedKey) apiKeyInput.value = savedKey;
+    const savedPers = localStorage.getItem('personality');
+    if (savedPers) personalitySelect.value = savedPers;
+    const savedVoice = localStorage.getItem('voice_preset');
+    if (savedVoice) voiceSelect.value = savedVoice;
+    const savedAuto = localStorage.getItem('auto_speak');
+    if (savedAuto !== null) autoSpeakToggle.checked = savedAuto === 'true';
+  }
+
+  // Service Worker for offline caching
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      const swCode = `self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request)))); self.addEventListener('install', e => e.waitUntil(caches.open('nexus-v1').then(c => c.addAll(['/']))));`;
+      const blob = new Blob([swCode], {type: 'application/javascript'});
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(e=>console.log);
+    });
+  }
+
+  // Start everything
+  window.speechSynthesis.onvoiceschanged = () => {};
+  openDB().then(() => { loadSettings(); loadConversationFromIndexedDB(); }).catch(() => loadSettings());
+  setInterval(() => persistMessages(), 8000);
+</script>
+</body>
+</html>
