@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>NEXUS · Altered Carbon Voice Suite</title>
-  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Nexus%20Carbon%22,%22short_name%22:%22Nexus%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23050b14%22,%22theme_color%22:%22%2300f0ff%22}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <title>NEXUS · Premium AI Voice Chat</title>
+  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Nexus%22,%22short_name%22:%22Nexus%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -16,757 +16,1751 @@
       box-sizing: border-box;
     }
 
-    body {
-      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', 'Poppins', sans-serif;
-      background: radial-gradient(circle at 10% 20%, #0a0f1e, #03060c);
-      color: #eef5ff;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f7f6f3;
+      --bg-tertiary: #efefef;
+      --text-primary: #1a1a1a;
+      --text-secondary: #626262;
+      --accent-primary: #0066cc;
+      --accent-light: #e8f0ff;
+      --border-light: #e5e5e5;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+      --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.15);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Background grid */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background-image: 
-        linear-gradient(rgba(0, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 255, 0.02) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      z-index: 0;
+    body.dark {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #2d2d2d;
+      --bg-tertiary: #3f3f3f;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0b0;
+      --accent-primary: #5b9fff;
+      --accent-light: #1e3a5f;
+      --border-light: #404040;
     }
 
-    /* Main app container */
-    .app-container {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-      position: relative;
-      z-index: 2;
-    }
-
-    /* Hamburger menu (drawer) */
-    .drawer {
-      position: fixed;
-      top: 0;
-      left: -320px;
-      width: 300px;
+    html, body {
       height: 100%;
-      background: rgba(8, 12, 22, 0.95);
-      backdrop-filter: blur(20px);
-      border-right: 1px solid rgba(0, 240, 255, 0.3);
-      transition: left 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      box-shadow: 4px 0 20px rgba(0,0,0,0.5);
-    }
-    .drawer.open {
-      left: 0;
-    }
-    .drawer-header {
-      padding: 20px;
-      border-bottom: 1px solid rgba(0, 240, 255, 0.3);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .drawer-header h3 {
-      font-size: 1.2rem;
-      color: #00f0ff;
-    }
-    .close-drawer {
-      background: none;
-      border: none;
-      color: #00f0ff;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-    .drawer-section {
-      padding: 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .drawer-section h4 {
-      margin-bottom: 12px;
-      color: #b77cff;
-      font-size: 0.9rem;
-      letter-spacing: 1px;
-    }
-    .drawer-section label {
-      display: block;
-      font-size: 0.75rem;
-      margin-top: 8px;
-      margin-bottom: 4px;
-    }
-    .drawer-section select, .drawer-section input, .drawer-section button {
-      width: 100%;
-      margin-bottom: 8px;
-      padding: 8px;
-      border-radius: 20px;
-      background: #0f1119;
-      border: 1px solid #2d3042;
-      color: white;
-    }
-    .drawer-section button {
-      background: #1e2a4a;
-      cursor: pointer;
-    }
-    .voice-preview {
-      background: #0a0f1e;
-      margin-top: 8px;
-      font-size: 0.7rem;
-      text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
     }
 
-    /* Main chat area */
-    .main-content {
+    .app-wrapper {
+      display: flex;
+      height: 100vh;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 280px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .logo i {
+      font-size: 24px;
+      color: var(--accent-primary);
+    }
+
+    .new-chat-btn {
+      width: 100%;
+      padding: 10px 16px;
+      background: var(--accent-primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
+      font-size: 14px;
+    }
+
+    .new-chat-btn:hover {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, #0052a3 100%);
+      box-shadow: var(--shadow-md);
+    }
+
+    .conversations-list {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+    }
+
+    .conversation-item {
+      padding: 12px;
+      margin-bottom: 8px;
+      background: var(--bg-primary);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+      font-size: 13px;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .conversation-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .conversation-item.active {
+      background: var(--accent-light);
+      color: var(--accent-primary);
+      font-weight: 500;
+      border-color: var(--accent-primary);
+    }
+
+    .sidebar-footer {
+      padding: 12px;
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar-btn {
+      padding: 10px 12px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-primary);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-btn:hover {
+      background: var(--bg-tertiary);
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-container {
       flex: 1;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      margin-left: 0;
-      transition: margin-left 0.3s;
     }
-    .app-header {
-      background: rgba(12, 20, 30, 0.55);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(0, 240, 255, 0.25);
-      padding: 10px 20px;
+
+    .header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-light);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background: var(--bg-primary);
     }
-    .menu-btn {
-      background: none;
-      border: none;
-      color: #00f0ff;
-      font-size: 1.6rem;
+
+    .header-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-primary);
       cursor: pointer;
-    }
-    .logo-area {
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: var(--transition);
+      font-size: 16px;
     }
-    .chat-container {
+
+    .icon-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--accent-light);
+      color: var(--accent-primary);
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-badge.offline {
+      background: #fef3e2;
+      color: #d97706;
+    }
+
+    /* ===== CHAT AREA ===== */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg-primary);
+    }
+
+    .messages-container {
       flex: 1;
       overflow-y: auto;
-      padding: 20px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
-    .input-area {
-      background: rgba(12, 20, 30, 0.55);
-      backdrop-filter: blur(16px);
-      border-top: 1px solid rgba(0, 240, 255, 0.25);
-      padding: 12px 20px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
+
+    .messages-container::-webkit-scrollbar {
+      width: 8px;
     }
-    .input-wrapper {
+
+    .messages-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb {
+      background: var(--border-light);
+      border-radius: 4px;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb:hover {
+      background: var(--text-secondary);
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .message-wrapper {
+      display: flex;
+      gap: 12px;
+      animation: fadeInUp 0.3s ease;
+      max-width: 80%;
+    }
+
+    .message-wrapper.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+      max-width: 80%;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .message-avatar.user {
+      background: var(--accent-light);
+      color: var(--accent-primary);
+    }
+
+    .message-avatar.assistant {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+
+    .message-content {
       flex: 1;
       display: flex;
-      background: #0f1119;
-      border-radius: 48px;
-      border: 1px solid #2d3042;
+      flex-direction: column;
+      gap: 8px;
     }
+
+    .message-bubble {
+      padding: 12px 16px;
+      border-radius: 12px;
+      word-wrap: break-word;
+      line-height: 1.5;
+    }
+
+    .message-wrapper.user .message-bubble {
+      background: var(--accent-primary);
+      color: white;
+      border-radius: 16px 4px 16px 16px;
+    }
+
+    .message-wrapper.assistant .message-bubble {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border-radius: 4px 16px 16px 16px;
+    }
+
+    .message-bubble code {
+      background: var(--bg-tertiary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .message-wrapper.user .message-bubble code {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .message-bubble pre {
+      background: var(--bg-tertiary);
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 8px 0;
+    }
+
+    .message-bubble pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .message-time {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .message-wrapper:hover .message-actions {
+      opacity: 1;
+    }
+
+    .action-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: var(--bg-tertiary);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      font-size: 13px;
+      transition: var(--transition);
+    }
+
+    .action-btn:hover {
+      background: var(--border-light);
+      color: var(--text-primary);
+    }
+
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-secondary);
+      animation: typing 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+      0%, 60%, 100% {
+        opacity: 0.5;
+        transform: translateY(0);
+      }
+      30% {
+        opacity: 1;
+        transform: translateY(-10px);
+      }
+    }
+
+    /* ===== INPUT AREA ===== */
+    .input-area {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border-light);
+      background: var(--bg-primary);
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .input-field {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 12px 16px;
+      transition: var(--transition);
+    }
+
+    .input-field:focus-within {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
     textarea {
       flex: 1;
       background: transparent;
       border: none;
-      padding: 10px 16px;
-      color: white;
+      outline: none;
+      color: var(--text-primary);
       resize: none;
       font-family: inherit;
-      outline: none;
+      font-size: 14px;
+      max-height: 120px;
+      min-height: 44px;
     }
-    .send-btn, .mic-btn {
-      background: linear-gradient(135deg, #00c6ff, #0072ff);
+
+    textarea::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .input-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .send-btn, .voice-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
       border: none;
-      margin: 5px;
-      border-radius: 40px;
-      width: 42px;
-      height: 42px;
+      background: var(--accent-primary);
       color: white;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      font-size: 16px;
     }
-    /* Message bubbles (same neon style) */
-    .message { display: flex; gap: 12px; max-width: 85%; animation: fadeSlide 0.2s; }
-    .message.user { align-self: flex-end; flex-direction: row-reverse; }
-    .bubble {
-      background: rgba(18, 25, 40, 0.7);
-      backdrop-filter: blur(4px);
-      border-radius: 28px;
+
+    .send-btn:hover {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, #0052a3 100%);
+      box-shadow: var(--shadow-md);
+    }
+
+    .voice-btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      color: var(--text-primary);
+    }
+
+    .voice-btn:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .voice-btn.listening {
+      background: #ff4757;
+      color: white;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: none;
+      }
+      50% {
+        box-shadow: 0 0 0 8px rgba(255, 71, 87, 0.2);
+      }
+    }
+
+    /* ===== SETTINGS MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .modal {
+      background: var(--bg-primary);
+      border-radius: 16px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s;
+      box-shadow: var(--shadow-lg);
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 24px;
+    }
+
+    .modal-content {
+      padding: 24px;
+    }
+
+    .settings-section {
+      margin-bottom: 24px;
+    }
+
+    .settings-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .settings-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .setting-item {
+      margin-bottom: 12px;
+    }
+
+    .setting-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    input[type="checkbox"] {
+      margin-right: 8px;
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    .range-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--bg-tertiary);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      cursor: pointer;
+      border: none;
+    }
+
+    .range-value {
+      font-size: 12px;
+      color: var(--text-secondary);
+      min-width: 30px;
+      text-align: right;
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-group.full {
+      grid-template-columns: 1fr;
+    }
+
+    button {
       padding: 10px 16px;
-      border: 1px solid rgba(0, 240, 255, 0.3);
-      box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+      border-radius: 8px;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      font-size: 13px;
+      transition: var(--transition);
     }
-    .message.user .bubble { background: rgba(0, 200, 220, 0.15); border-color: #00f0ff; }
-    .tool-buttons { display: flex; gap: 8px; margin-top: 8px; }
-    .tool-buttons i { cursor: pointer; background: #0f1119; padding: 4px; border-radius: 20px; }
-    footer { text-align: center; font-size: 0.65rem; padding: 4px; color: #5f658c; background: rgba(0,0,0,0.5); }
-    @media (max-width: 700px) { .message { max-width: 95%; } }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, #0052a3 100%);
+    }
+
+    .btn-secondary {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 16px;
+      background: var(--text-primary);
+      color: var(--bg-primary);
+      border-radius: 8px;
+      font-size: 13px;
+      animation: slideInRight 0.3s;
+      z-index: 2000;
+      max-width: 300px;
+    }
+
+    .toast.error {
+      background: #ef4444;
+      color: white;
+    }
+
+    .toast.success {
+      background: #10b981;
+      color: white;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        height: 100%;
+        z-index: 900;
+        transition: left var(--transition);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      .app-wrapper {
+        position: relative;
+      }
+
+      .mobile-menu-btn {
+        display: flex !important;
+      }
+
+      .message-wrapper,
+      .message-wrapper.user {
+        max-width: 95%;
+      }
+
+      .messages-container {
+        padding: 16px;
+      }
+
+      .input-area {
+        padding: 16px;
+      }
+
+      .modal {
+        width: 95%;
+        max-height: 90vh;
+      }
+    }
+
+    .mobile-menu-btn {
+      display: none;
+    }
+
+    /* ===== UTILITIES ===== */
+    .hidden {
+      display: none;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
   </style>
 </head>
 <body>
+  <div class="app-wrapper">
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fas fa-brain"></i>
+          <span>NEXUS</span>
+        </div>
+        <button class="new-chat-btn" id="newChatBtn">
+          <i class="fas fa-plus"></i>
+          New Chat
+        </button>
+      </div>
 
-<div class="drawer" id="drawer">
-  <div class="drawer-header">
-    <h3><i class="fas fa-sliders-h"></i> Nexus Control</h3>
-    <button class="close-drawer" id="closeDrawerBtn"><i class="fas fa-times"></i></button>
-  </div>
-  <div class="drawer-section">
-    <h4><i class="fas fa-key"></i> API & Persona</h4>
-    <label>Gemini API Key</label>
-    <input type="password" id="apiKeyInput" placeholder="Paste free Gemini key">
-    <label>AI Personality</label>
-    <select id="personalitySelect">
-      <option value="default">Nexus Core</option>
-      <option value="dig">⚡ Dig AI Lady (Altered Carbon)</option>
-      <option value="alex">🎭 Alex Park (The Good Doctor)</option>
-      <option value="poe">🌌 Poe AI (Altered Carbon)</option>
-    </select>
-  </div>
-  <div class="drawer-section">
-    <h4><i class="fas fa-waveform"></i> Voice Tuning (Closest to characters)</h4>
-    <label>System Voice</label>
-    <select id="voiceSelect"></select>
-    <label>Pitch (0.5 - 2.0)</label>
-    <input type="range" id="voicePitch" min="0.5" max="2.0" step="0.05" value="1.0">
-    <label>Rate (0.5 - 2.0)</label>
-    <input type="range" id="voiceRate" min="0.5" max="2.0" step="0.05" value="1.0">
-    <button id="previewVoiceBtn"><i class="fas fa-play"></i> Preview voice</button>
-    <div class="voice-preview" id="voicePreviewMsg">Click preview to hear</div>
-  </div>
-  <div class="drawer-section">
-    <h4><i class="fas fa-cog"></i> Settings</h4>
-    <label><input type="checkbox" id="autoSpeakToggle" checked> Auto‑speak AI replies</label>
-    <label><input type="checkbox" id="autoScrollToggle" checked> Auto‑scroll chat</label>
-    <label><input type="checkbox" id="darkModeToggle" checked> Dark mode (neon)</label>
-    <button id="clearDataBtn" style="background:#dc2626;">⚠️ Clear all data</button>
-    <button id="exportAllSettingsBtn">📤 Export settings & chats</button>
-    <input type="file" id="importSettingsFile" accept=".json" style="display:none">
-    <button id="importSettingsBtn">📥 Import settings</button>
-  </div>
-  <div class="drawer-section">
-    <h4><i class="fas fa-tools"></i> Extra Tools</h4>
-    <button id="showTodosBtn"><i class="fas fa-list-check"></i> To‑Do List</button>
-    <button id="showNotesBtn"><i class="fas fa-sticky-note"></i> Quick Notes</button>
-  </div>
-</div>
+      <div class="conversations-list" id="conversationsList"></div>
 
-<div class="main-content">
-  <div class="app-header">
-    <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
-    <div class="logo-area">
-      <i class="fas fa-microchip" style="color:#00f0ff"></i>
-      <h2>NEXUS · Carbon Voice</h2>
+      <div class="sidebar-footer">
+        <button class="sidebar-btn" id="settingsBtn">
+          <i class="fas fa-sliders-h"></i>
+          Settings
+        </button>
+        <button class="sidebar-btn" id="themeToggleBtn">
+          <i class="fas fa-moon"></i>
+          <span id="themeLabel">Dark Mode</span>
+        </button>
+      </div>
     </div>
-    <div><span id="statusBadge" class="status-online"><i class="fas fa-satellite-dish"></i> Online</span></div>
-  </div>
 
-  <div class="chat-container" id="chatContainer">
-    <div class="message assistant">
-      <div class="bubble">🌀 Nexus Carbon online. <br>✨ Commands: <code>/joke</code> <code>/fact</code> <code>/define word</code> <code>/time London</code> <code>/qr text</code><br>🎤 Click mic & speak. Adjust voice in hamburger menu → Voice Tuning to match Dig / Alex / Poe.</div>
+    <!-- MAIN CONTENT -->
+    <div class="main-container">
+      <!-- HEADER -->
+      <div class="header">
+        <div class="header-title">Chat with Nexus AI</div>
+        <div class="header-actions">
+          <button class="icon-btn mobile-menu-btn" id="mobileSidebarBtn">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="status-badge" id="statusBadge">
+            <i class="fas fa-dot-circle"></i>
+            <span>Connected</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHAT AREA -->
+      <div class="chat-area">
+        <div class="messages-container" id="messagesContainer">
+          <div class="empty-state">
+            <i class="fas fa-comments"></i>
+            <p>Start a conversation</p>
+            <p style="font-size: 12px; margin-top: 8px;">Type a message or use voice input</p>
+          </div>
+        </div>
+
+        <!-- INPUT AREA -->
+        <div class="input-area">
+          <div class="input-wrapper">
+            <div class="input-field">
+              <textarea id="messageInput" placeholder="Ask me anything..." spellcheck="true"></textarea>
+            </div>
+            <div class="input-actions">
+              <button class="voice-btn" id="voiceBtn" title="Voice input">
+                <i class="fas fa-microphone"></i>
+              </button>
+              <button class="send-btn" id="sendBtn" title="Send message">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="input-area">
-    <div class="input-wrapper">
-      <textarea id="userInput" placeholder="Message or /command ..."></textarea>
-      <button id="sendBtn" class="send-btn"><i class="fas fa-paper-plane"></i></button>
-      <button id="micBtn" class="mic-btn"><i class="fas fa-microphone-alt"></i></button>
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Settings</h2>
+        <button class="close-modal" id="closeSettingsBtn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-content">
+        <!-- API Configuration -->
+        <div class="settings-section">
+          <div class="settings-label"><i class="fas fa-key"></i> API Configuration</div>
+          <div class="setting-item">
+            <label class="setting-label">API Key (Google Generative AI)</label>
+            <input type="password" id="apiKeyInput" placeholder="Enter your Generative AI API key">
+            <small style="color: var(--text-secondary); font-size: 11px; margin-top: 4px; display: block;">
+              Get free API at: console.cloud.google.com
+            </small>
+          </div>
+        </div>
+
+        <!-- Personality -->
+        <div class="settings-section">
+          <div class="settings-label"><i class="fas fa-mask"></i> AI Personality</div>
+          <div class="setting-item">
+            <label class="setting-label">Choose Character</label>
+            <select id="personalitySelect">
+              <option value="default">Default Assistant</option>
+              <option value="professional">Professional</option>
+              <option value="creative">Creative</option>
+              <option value="casual">Casual & Friendly</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Voice Settings -->
+        <div class="settings-section">
+          <div class="settings-label"><i class="fas fa-volume-up"></i> Voice Settings</div>
+          <div class="setting-item">
+            <label class="setting-label">Voice</label>
+            <select id="voiceSelect"></select>
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">Pitch</label>
+            <div class="range-container">
+              <input type="range" id="pitchSlider" min="0.5" max="2" step="0.1" value="1">
+              <span class="range-value" id="pitchValue">1.0</span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">Speed</label>
+            <div class="range-container">
+              <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
+              <span class="range-value" id="speedValue">1.0</span>
+            </div>
+          </div>
+          <button class="btn-secondary" id="previewVoiceBtn" style="width: 100%; margin-top: 8px;">
+            <i class="fas fa-play"></i> Preview Voice
+          </button>
+        </div>
+
+        <!-- Preferences -->
+        <div class="settings-section">
+          <div class="settings-label"><i class="fas fa-cog"></i> Preferences</div>
+          <div class="setting-item">
+            <label class="checkbox-label">
+              <input type="checkbox" id="autoSpeakToggle" checked>
+              Auto-speak responses
+            </label>
+          </div>
+          <div class="setting-item">
+            <label class="checkbox-label">
+              <input type="checkbox" id="autoScrollToggle" checked>
+              Auto-scroll to new messages
+            </label>
+          </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="settings-section">
+          <div class="settings-label"><i class="fas fa-database"></i> Data Management</div>
+          <div class="btn-group full">
+            <button class="btn-secondary" id="exportBtn">
+              <i class="fas fa-download"></i> Export Chat
+            </button>
+            <button class="btn-secondary" id="importBtn">
+              <i class="fas fa-upload"></i> Import Chat
+            </button>
+            <input type="file" id="importFile" accept=".json" style="display: none;">
+          </div>
+          <button class="btn-danger" id="clearDataBtn" style="width: 100%; margin-top: 12px;">
+            <i class="fas fa-trash"></i> Clear All Data
+          </button>
+        </div>
+      </div>
     </div>
-    <button id="speakLastBtn" class="tool-icon"><i class="fas fa-play-circle"></i></button>
   </div>
-  <footer><i class="fas fa-robot"></i> Free: Gemini API (your key) + nearest voice approximation. Tune pitch/rate for character feel.</footer>
-</div>
 
-<script>
-  // ======================== DOM Elements ========================
-  const drawer = document.getElementById('drawer');
-  const menuBtn = document.getElementById('menuBtn');
-  const closeDrawerBtn = document.getElementById('closeDrawerBtn');
-  const apiKeyInput = document.getElementById('apiKeyInput');
-  const personalitySelect = document.getElementById('personalitySelect');
-  const voiceSelect = document.getElementById('voiceSelect');
-  const voicePitch = document.getElementById('voicePitch');
-  const voiceRate = document.getElementById('voiceRate');
-  const previewVoiceBtn = document.getElementById('previewVoiceBtn');
-  const autoSpeakToggle = document.getElementById('autoSpeakToggle');
-  const autoScrollToggle = document.getElementById('autoScrollToggle');
-  const darkModeToggle = document.getElementById('darkModeToggle');
-  const clearDataBtn = document.getElementById('clearDataBtn');
-  const exportAllSettingsBtn = document.getElementById('exportAllSettingsBtn');
-  const importSettingsBtn = document.getElementById('importSettingsBtn');
-  const importSettingsFile = document.getElementById('importSettingsFile');
-  const showTodosBtn = document.getElementById('showTodosBtn');
-  const showNotesBtn = document.getElementById('showNotesBtn');
-  const chatContainer = document.getElementById('chatContainer');
-  const userInput = document.getElementById('userInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const micBtn = document.getElementById('micBtn');
-  const speakLastBtn = document.getElementById('speakLastBtn');
-  const statusBadge = document.getElementById('statusBadge');
-
-  // ======================== State ========================
-  let currentAbortController = null;
-  let lastAssistantMessage = "";
-  let isSpeaking = false;
-  let recognition = null;
-  let isListening = false;
-  let db;
-  let autoScroll = true;
-  let availableVoices = [];
-
-  // ======================== IndexedDB & Storage ========================
-  const DB_NAME = 'NexusCarbonDB';
-  const STORE_NAME = 'conversations';
-  function openDB() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, 1);
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => { db = request.result; resolve(db); };
-      request.onupgradeneeded = (e) => {
-        const db = e.target.result;
-        if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      };
-    });
-  }
-  async function saveConversation(messages) {
-    if (!db) await openDB();
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).put({ id: 'main', messages, updated: Date.now() });
-    return tx.complete;
-  }
-  function getCurrentMessages() {
-    const messages = [];
-    document.querySelectorAll('.message').forEach(msgDiv => {
-      const role = msgDiv.classList.contains('user') ? 'user' : 'assistant';
-      const bubble = msgDiv.querySelector('.bubble');
-      if (bubble) {
-        let text = bubble.innerText;
-        text = text.replace(/Speak|Copy|Pin|Delete|Edit/g, '').trim();
-        messages.push({ role, content: text, timestamp: msgDiv.dataset.ts || Date.now() });
-      }
-    });
-    return messages;
-  }
-  async function persistMessages() { await saveConversation(getCurrentMessages()); }
-  async function loadConversation() {
-    if (!db) await openDB();
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const req = tx.objectStore(STORE_NAME).get('main');
-    return new Promise(resolve => { req.onsuccess = () => { if (req.result?.messages) renderMessagesFromArray(req.result.messages); resolve(); }; });
-  }
-  function renderMessagesFromArray(messages) {
-    chatContainer.innerHTML = '';
-    messages.forEach(msg => appendMessageElement(msg.role, msg.content, false, msg.timestamp));
-    scrollToBottom();
-  }
-
-  // ======================== UI Helpers ========================
-  function scrollToBottom() { if (autoScroll) chatContainer.scrollTop = chatContainer.scrollHeight; }
-  function showToast(msg) {
-    const t = document.createElement('div'); t.innerText = msg;
-    t.style.position = 'fixed'; t.style.bottom = '70px'; t.style.right = '20px';
-    t.style.background = 'rgba(0,0,0,0.8)'; t.style.backdropFilter = 'blur(12px)';
-    t.style.border = '1px solid #00f0ff'; t.style.borderRadius = '40px'; t.style.padding = '8px 16px';
-    t.style.zIndex = 999; t.style.fontSize = '0.8rem';
-    document.body.appendChild(t); setTimeout(() => t.remove(), 1800);
-  }
-
-  function appendMessageElement(role, text, saveToDB = true, timestamp = null) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${role}`;
-    const ts = timestamp || Date.now();
-    messageDiv.dataset.ts = ts;
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    if (role === 'assistant') {
-      bubble.innerHTML = marked.parse(text, { breaks: true, async: false });
-      bubble.querySelectorAll('pre code').forEach(bl => hljs.highlightElement(bl));
-      const tools = document.createElement('div');
-      tools.className = 'tool-buttons';
-      tools.innerHTML = `<i class="fas fa-volume-up" title="Speak"></i> <i class="fas fa-copy" title="Copy"></i> <i class="fas fa-thumbtack" title="Pin"></i>`;
-      tools.querySelector('.fa-volume-up').addEventListener('click', () => speakText(text));
-      tools.querySelector('.fa-copy').addEventListener('click', () => { navigator.clipboard.writeText(text); showToast("Copied"); });
-      tools.querySelector('.fa-thumbtack').addEventListener('click', () => togglePin(messageDiv));
-      bubble.appendChild(tools);
-      lastAssistantMessage = text;
-    } else {
-      bubble.innerText = text;
-      const actionDiv = document.createElement('div');
-      actionDiv.className = 'message-actions';
-      actionDiv.innerHTML = `<i class="fas fa-pen" title="Edit"></i> <i class="fas fa-trash" title="Delete"></i> <i class="fas fa-copy" title="Copy"></i>`;
-      actionDiv.querySelector('.fa-pen').addEventListener('click', () => editMessage(messageDiv, text));
-      actionDiv.querySelector('.fa-trash').addEventListener('click', () => deleteMessage(messageDiv));
-      actionDiv.querySelector('.fa-copy').addEventListener('click', () => { navigator.clipboard.writeText(text); showToast("Copied"); });
-      bubble.appendChild(actionDiv);
-    }
-    const timeSpan = document.createElement('div');
-    timeSpan.className = 'timestamp';
-    timeSpan.innerText = new Date(parseInt(ts)).toLocaleTimeString();
-    bubble.appendChild(timeSpan);
-    messageDiv.appendChild(bubble);
-    chatContainer.appendChild(messageDiv);
-    scrollToBottom();
-    if (saveToDB) persistMessages();
-  }
-  function deleteMessage(msgDiv) { if (confirm("Delete?")) { msgDiv.remove(); persistMessages(); } }
-  function editMessage(msgDiv, oldText) {
-    const newText = prompt("Edit:", oldText);
-    if (newText && newText.trim()) { msgDiv.querySelector('.bubble').childNodes[0].nodeValue = newText; persistMessages(); showToast("Updated"); }
-  }
-  function togglePin(msgDiv) {
-    const id = msgDiv.dataset.ts;
-    let pinned = JSON.parse(localStorage.getItem('pinnedMessages') || '[]');
-    if (pinned.includes(id)) { pinned = pinned.filter(i => i !== id); showToast("Unpinned"); }
-    else { pinned.push(id); showToast("Pinned"); }
-    localStorage.setItem('pinnedMessages', JSON.stringify(pinned));
-  }
-
-  // ======================== Voice & Speech (Tunable) ========================
-  function loadVoices() {
-    availableVoices = window.speechSynthesis.getVoices();
-    voiceSelect.innerHTML = '<option value="">Select system voice</option>';
-    availableVoices.forEach(voice => {
-      const option = document.createElement('option');
-      option.value = voice.name;
-      option.textContent = `${voice.name} (${voice.lang})`;
-      voiceSelect.appendChild(option);
-    });
-    // load saved voice name
-    const savedVoice = localStorage.getItem('voice_name');
-    if (savedVoice && [...voiceSelect.options].some(opt => opt.value === savedVoice)) voiceSelect.value = savedVoice;
-  }
-  function getSelectedVoice() {
-    const name = voiceSelect.value;
-    return availableVoices.find(v => v.name === name) || null;
-  }
-  function speakText(text) {
-    if (!window.speechSynthesis) return;
-    if (isSpeaking) window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voice = getSelectedVoice();
-    if (voice) utterance.voice = voice;
-    utterance.pitch = parseFloat(voicePitch.value);
-    utterance.rate = parseFloat(voiceRate.value);
-    utterance.onend = () => { isSpeaking = false; };
-    utterance.onstart = () => { isSpeaking = true; };
-    window.speechSynthesis.speak(utterance);
-  }
-  function stopSpeaking() { window.speechSynthesis?.cancel(); isSpeaking = false; }
-  previewVoiceBtn.addEventListener('click', () => {
-    const previewText = "This is how your current voice settings sound. Adjust pitch and rate to match Dig, Alex or Poe.";
-    speakText(previewText);
-    document.getElementById('voicePreviewMsg').innerText = "Previewing...";
-    setTimeout(() => document.getElementById('voicePreviewMsg').innerText = "Ready", 2000);
-  });
-  speakLastBtn.addEventListener('click', () => { if (lastAssistantMessage) speakText(lastAssistantMessage); });
-
-  // ======================== Free Commands ========================
-  async function fetchJoke() {
-    try { const res = await fetch('https://icanhazdadjoke.com/', { headers: { 'Accept': 'application/json' } }); const data = await res.json(); return `😂 ${data.joke}`; } catch { return "⚠️ Joke offline"; }
-  }
-  async function fetchFact() {
-    try { const res = await fetch('https://uselessfacts.jsph.pl/api/v2/facts/random'); const data = await res.json(); return `📡 ${data.text}`; } catch { return "⚠️ Fact error"; }
-  }
-  async function fetchDefinition(word) {
-    try { const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`); if(!res.ok) return `No definition for ${word}`; const data = await res.json(); return `📖 ${word}: ${data[0]?.meanings[0]?.definitions[0]?.definition}`; } catch { return "Dictionary error"; }
-  }
-  async function fetchWorldTime(tz) {
-    try { const res = await fetch(`https://worldtimeapi.org/api/timezone/${encodeURIComponent(tz)}`); if(!res.ok) return `Timezone ${tz} not found`; const data = await res.json(); return `🕒 ${tz}: ${new Date(data.datetime).toLocaleString()}`; } catch { return "Time error"; }
-  }
-  async function generateQR(text) {
-    const img = document.createElement('img');
-    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(text)}`;
-    img.style.maxWidth = '100px'; img.style.borderRadius = '12px';
-    return new Promise(resolve => { img.onload = () => resolve(`🔲 QR:<br>${img.outerHTML}`); img.onerror = () => resolve(`QR failed for: ${text}`); });
-  }
-  async function handleCommand(input) {
-    const lower = input.trim().toLowerCase();
-    if (lower === '/joke') return await fetchJoke();
-    if (lower === '/fact') return await fetchFact();
-    if (lower.startsWith('/define ')) return await fetchDefinition(input.slice(8).trim());
-    if (lower.startsWith('/time ')) return await fetchWorldTime(input.slice(6).trim());
-    if (lower.startsWith('/qr ')) return await generateQR(input.slice(4).trim());
-    return null;
-  }
-
-  // ======================== Gemini Streaming ========================
-  function getPersonalityPrompt(p) {
-    const prompts = {
-      default: "You are a helpful, futuristic AI.",
-      dig: "You are Dig AI Lady from Altered Carbon. Speak with mysterious, sultry digital wisdom. Use metaphors about stacks and sleeves.",
-      alex: "You are Dr. Alex Park from The Good Doctor. Empathetic, precise, kind, with analytical pauses.",
-      poe: "You are Poe AI from Altered Carbon. Charming, erudite, loyal, dramatic vintage flair."
+  <script>
+    // ======================== CONFIG ========================
+    const CONFIG = {
+      dbName: 'NexusChatDB',
+      storeName: 'conversations',
+      maxContextMessages: 6,
+      messageRetryLimit: 3
     };
-    return prompts[p] || prompts.default;
-  }
-  let typingDiv = null;
-  function showTyping() { if(typingDiv) typingDiv.remove(); typingDiv = document.createElement('div'); typingDiv.className = 'typing-indicator'; typingDiv.innerHTML = '<span></span><span></span><span></span><span> AI composing</span>'; chatContainer.appendChild(typingDiv); scrollToBottom(); }
-  function hideTyping() { if(typingDiv) { typingDiv.remove(); typingDiv = null; } }
-  async function sendToGeminiStream(userMessage) {
-    const apiKey = apiKeyInput.value.trim();
-    if (!apiKey) { appendMessageElement('assistant', "🔑 Please paste your Gemini API key in the hamburger menu.", true); return false; }
-    const personality = personalitySelect.value;
-    const systemPrompt = getPersonalityPrompt(personality);
-    const history = getCurrentMessages().slice(-6);
-    const contents = [{ role: "user", parts: [{ text: systemPrompt + "\nContext follows." }] }];
-    history.forEach(msg => contents.push({ role: msg.role === 'user' ? "user" : "model", parts: [{ text: msg.content }] }));
-    contents.push({ role: "user", parts: [{ text: userMessage }] });
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:streamGenerateContent?key=${apiKey}&alt=sse`;
-    try {
-      if (currentAbortController) currentAbortController.abort();
-      currentAbortController = new AbortController();
-      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents, generationConfig: { temperature: 0.7, maxOutputTokens: 1024 } }), signal: currentAbortController.signal });
-      if (!response.ok) throw new Error(`API error ${response.status}`);
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullText = "";
-      let assistantDiv = null, bubbleDiv = null;
-      hideTyping();
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const jsonStr = line.slice(6);
-              if (jsonStr === '[DONE]') continue;
-              const parsed = JSON.parse(jsonStr);
-              const textPart = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
-              if (textPart) {
-                fullText += textPart;
-                if (!assistantDiv) {
-                  assistantDiv = document.createElement('div'); assistantDiv.className = 'message assistant';
-                  bubbleDiv = document.createElement('div'); bubbleDiv.className = 'bubble';
-                  assistantDiv.appendChild(bubbleDiv);
-                  chatContainer.appendChild(assistantDiv);
-                }
-                if (bubbleDiv) {
-                  bubbleDiv.innerHTML = marked.parse(fullText, { breaks: true });
-                  bubbleDiv.querySelectorAll('pre code').forEach(bl => hljs.highlightElement(bl));
-                  if (!bubbleDiv.querySelector('.tool-buttons')) {
-                    const tools = document.createElement('div'); tools.className = 'tool-buttons';
-                    tools.innerHTML = `<i class="fas fa-volume-up" title="Speak"></i> <i class="fas fa-copy" title="Copy"></i> <i class="fas fa-thumbtack" title="Pin"></i>`;
-                    tools.querySelector('.fa-volume-up').addEventListener('click', () => speakText(fullText));
-                    tools.querySelector('.fa-copy').addEventListener('click', () => { navigator.clipboard.writeText(fullText); showToast("Copied"); });
-                    tools.querySelector('.fa-thumbtack').addEventListener('click', () => togglePin(assistantDiv));
-                    bubbleDiv.appendChild(tools);
-                  }
+
+    // ======================== STATE ========================
+    let state = {
+      currentConversationId: null,
+      conversations: [],
+      isListening: false,
+      isSpeaking: false,
+      availableVoices: [],
+      currentModel: 'gemini-2.0-flash',
+      isDarkMode: localStorage.getItem('darkMode') === 'true'
+    };
+
+    // ======================== DOM ELEMENTS ========================
+    const elements = {
+      sidebar: document.getElementById('sidebar'),
+      messagesContainer: document.getElementById('messagesContainer'),
+      messageInput: document.getElementById('messageInput'),
+      sendBtn: document.getElementById('sendBtn'),
+      voiceBtn: document.getElementById('voiceBtn'),
+      newChatBtn: document.getElementById('newChatBtn'),
+      settingsBtn: document.getElementById('settingsBtn'),
+      themeToggleBtn: document.getElementById('themeToggleBtn'),
+      themeLabel: document.getElementById('themeLabel'),
+      settingsModal: document.getElementById('settingsModal'),
+      closeSettingsBtn: document.getElementById('closeSettingsBtn'),
+      conversationsList: document.getElementById('conversationsList'),
+      statusBadge: document.getElementById('statusBadge'),
+      apiKeyInput: document.getElementById('apiKeyInput'),
+      personalitySelect: document.getElementById('personalitySelect'),
+      voiceSelect: document.getElementById('voiceSelect'),
+      pitchSlider: document.getElementById('pitchSlider'),
+      speedSlider: document.getElementById('speedSlider'),
+      pitchValue: document.getElementById('pitchValue'),
+      speedValue: document.getElementById('speedValue'),
+      autoSpeakToggle: document.getElementById('autoSpeakToggle'),
+      autoScrollToggle: document.getElementById('autoScrollToggle'),
+      previewVoiceBtn: document.getElementById('previewVoiceBtn'),
+      exportBtn: document.getElementById('exportBtn'),
+      importBtn: document.getElementById('importBtn'),
+      importFile: document.getElementById('importFile'),
+      clearDataBtn: document.getElementById('clearDataBtn'),
+      mobileSidebarBtn: document.getElementById('mobileSidebarBtn'),
+    };
+
+    // ======================== DATABASE ========================
+    let db;
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(CONFIG.dbName, 1);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          db = request.result;
+          resolve(db);
+        };
+        request.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(CONFIG.storeName)) {
+            db.createObjectStore(CONFIG.storeName, { keyPath: 'id' });
+          }
+        };
+      });
+    }
+
+    async function saveConversation(conv) {
+      if (!db) await openDB();
+      const tx = db.transaction(CONFIG.storeName, 'readwrite');
+      tx.objectStore(CONFIG.storeName).put(conv);
+      return new Promise((resolve) => {
+        tx.oncomplete = resolve;
+      });
+    }
+
+    async function loadConversations() {
+      if (!db) await openDB();
+      return new Promise((resolve) => {
+        const tx = db.transaction(CONFIG.storeName, 'readonly');
+        const request = tx.objectStore(CONFIG.storeName).getAll();
+        request.onsuccess = () => {
+          state.conversations = request.result.sort((a, b) => b.updated - a.updated);
+          resolve(state.conversations);
+        };
+      });
+    }
+
+    // ======================== UI UTILS ========================
+    function showToast(message, type = 'default') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    function formatTime(timestamp) {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffDays < 7) return `${diffDays}d ago`;
+      return date.toLocaleDateString();
+    }
+
+    function autoResizeTextarea(textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    }
+
+    // ======================== MESSAGE RENDERING ========================
+    function createMessageElement(message, isUser) {
+      const wrapper = document.createElement('div');
+      wrapper.className = `message-wrapper ${isUser ? 'user' : ''}`;
+      wrapper.dataset.timestamp = message.timestamp;
+
+      const avatar = document.createElement('div');
+      avatar.className = `message-avatar ${isUser ? 'user' : 'assistant'}`;
+      avatar.innerHTML = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+
+      const content = document.createElement('div');
+      content.className = 'message-content';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+
+      if (isUser) {
+        bubble.textContent = message.text;
+      } else {
+        bubble.innerHTML = marked.parse(message.text, { breaks: true });
+        bubble.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block);
+        });
+      }
+
+      const time = document.createElement('div');
+      time.className = 'message-time';
+      time.textContent = formatTime(message.timestamp);
+
+      const actions = document.createElement('div');
+      actions.className = 'message-actions';
+      actions.innerHTML = `
+        <button class="action-btn" title="Copy">
+          <i class="fas fa-copy"></i>
+        </button>
+        ${!isUser ? `<button class="action-btn" title="Speak"><i class="fas fa-volume-up"></i></button>` : ''}
+      `;
+
+      actions.querySelector('.fa-copy').parentElement.addEventListener('click', () => {
+        navigator.clipboard.writeText(message.text);
+        showToast('Copied to clipboard', 'success');
+      });
+
+      if (!isUser) {
+        actions.querySelector('.fa-volume-up')?.parentElement?.addEventListener('click', () => {
+          speakText(message.text);
+        });
+      }
+
+      content.appendChild(bubble);
+      content.appendChild(time);
+      content.appendChild(actions);
+      wrapper.appendChild(avatar);
+      wrapper.appendChild(content);
+
+      return wrapper;
+    }
+
+    function appendMessage(message, isUser) {
+      const msgElement = createMessageElement(message, isUser);
+      elements.messagesContainer.appendChild(msgElement);
+      scrollToBottom();
+    }
+
+    function scrollToBottom() {
+      if (elements.autoScrollToggle.checked) {
+        setTimeout(() => {
+          elements.messagesContainer.scrollTop = elements.messagesContainer.scrollHeight;
+        }, 0);
+      }
+    }
+
+    function clearMessages() {
+      elements.messagesContainer.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-comments"></i>
+          <p>Start a conversation</p>
+          <p style="font-size: 12px; margin-top: 8px;">Type a message or use voice input</p>
+        </div>
+      `;
+    }
+
+    // ======================== CONVERSATION MANAGEMENT ========================
+    async function createNewConversation() {
+      const id = Date.now().toString();
+      const conv = {
+        id,
+        title: 'New Chat',
+        messages: [],
+        created: Date.now(),
+        updated: Date.now()
+      };
+      await saveConversation(conv);
+      state.conversations.unshift(conv);
+      selectConversation(id);
+      updateConversationsList();
+    }
+
+    async function selectConversation(id) {
+      state.currentConversationId = id;
+      const conv = state.conversations.find(c => c.id === id);
+      clearMessages();
+
+      if (conv && conv.messages.length > 0) {
+        conv.messages.forEach(msg => {
+          appendMessage(msg, msg.isUser);
+        });
+      }
+
+      updateConversationsList();
+      localStorage.setItem('lastConversation', id);
+    }
+
+    function updateConversationsList() {
+      elements.conversationsList.innerHTML = '';
+      state.conversations.forEach(conv => {
+        const item = document.createElement('div');
+        item.className = `conversation-item ${conv.id === state.currentConversationId ? 'active' : ''}`;
+        item.textContent = conv.title;
+        item.addEventListener('click', () => selectConversation(conv.id));
+        elements.conversationsList.appendChild(item);
+      });
+    }
+
+    async function updateConversationTitle(id, title) {
+      const conv = state.conversations.find(c => c.id === id);
+      if (conv) {
+        conv.title = title;
+        conv.updated = Date.now();
+        await saveConversation(conv);
+        updateConversationsList();
+      }
+    }
+
+    // ======================== API COMMUNICATION ========================
+    async function sendMessage(userMessage) {
+      const apiKey = elements.apiKeyInput.value.trim();
+      if (!apiKey) {
+        showToast('Please configure your API key in settings', 'error');
+        return false;
+      }
+
+      const conv = state.conversations.find(c => c.id === state.currentConversationId);
+      if (!conv) return false;
+
+      // Add user message
+      const userMsg = { text: userMessage, isUser: true, timestamp: Date.now() };
+      conv.messages.push(userMsg);
+      appendMessage(userMsg, true);
+
+      // Show typing indicator
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'message-wrapper';
+      typingDiv.innerHTML = `
+        <div class="message-avatar assistant"><i class="fas fa-robot"></i></div>
+        <div class="message-content">
+          <div class="message-bubble">
+            <div class="typing-indicator">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          </div>
+        </div>
+      `;
+      elements.messagesContainer.appendChild(typingDiv);
+      scrollToBottom();
+
+      try {
+        const personality = elements.personalitySelect.value;
+        const systemPrompt = getSystemPrompt(personality);
+
+        const messages = conv.messages
+          .slice(-CONFIG.maxContextMessages)
+          .map(msg => ({
+            role: msg.isUser ? 'user' : 'model',
+            parts: [{ text: msg.text }]
+          }));
+
+        const contents = [
+          {
+            role: 'user',
+            parts: [{ text: systemPrompt + '\n\n' + messages[0]?.parts[0]?.text || '' }]
+          },
+          ...messages.slice(1)
+        ];
+
+        const url = `https://generativelanguage.googleapis.com/v1/models/${state.currentModel}:streamGenerateContent?key=${apiKey}&alt=sse`;
+
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents,
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 2048
+            }
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`API Error ${response.status}`);
+        }
+
+        let fullResponse = '';
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        typingDiv.remove();
+        const msgWrapper = document.createElement('div');
+        msgWrapper.className = 'message-wrapper';
+        msgWrapper.innerHTML = `
+          <div class="message-avatar assistant"><i class="fas fa-robot"></i></div>
+          <div class="message-content">
+            <div class="message-bubble" id="aiResponse"></div>
+          </div>
+        `;
+        elements.messagesContainer.appendChild(msgWrapper);
+        const responseDiv = document.getElementById('aiResponse');
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) {
+                  fullResponse += text;
+                  responseDiv.innerHTML = marked.parse(fullResponse, { breaks: true });
+                  responseDiv.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
                   scrollToBottom();
                 }
-              }
-            } catch(e) {}
+              } catch (e) {}
+            }
           }
         }
-      }
-      if (fullText) {
-        assistantDiv.dataset.ts = Date.now();
-        lastAssistantMessage = fullText;
-        if (autoSpeakToggle.checked && fullText.length > 20) speakText(fullText);
-        persistMessages();
+
+        if (fullResponse) {
+          const aiMsg = { text: fullResponse, isUser: false, timestamp: Date.now() };
+          conv.messages.push(aiMsg);
+
+          // Update conversation title from first message
+          if (conv.messages.length === 2) {
+            const title = userMessage.substring(0, 50);
+            await updateConversationTitle(conv.id, title);
+          }
+
+          // Auto-speak if enabled
+          if (elements.autoSpeakToggle.checked) {
+            speakText(fullResponse);
+          }
+
+          conv.updated = Date.now();
+          await saveConversation(conv);
+        }
+
         return true;
-      } else throw new Error("empty");
-    } catch (err) {
-      if (err.name !== 'AbortError') { hideTyping(); appendMessageElement('assistant', `❌ Gemini error: ${err.message}`, true); }
-      return false;
-    } finally { currentAbortController = null; }
-  }
-
-  async function handleSend() {
-    let text = userInput.value.trim();
-    if (!text) return;
-    const cmdRes = await handleCommand(text);
-    if (cmdRes) {
-      appendMessageElement('assistant', cmdRes, true);
-      userInput.value = ''; userInput.style.height = 'auto';
-      return;
-    }
-    if (!apiKeyInput.value.trim()) { appendMessageElement('assistant', "🔑 Enter Gemini API key in menu.", true); return; }
-    appendMessageElement('user', text, true);
-    userInput.value = ''; userInput.style.height = 'auto';
-    showTyping();
-    await sendToGeminiStream(text);
-  }
-
-  // ======================== Speech-to-Text ========================
-  function initSpeechRecognition() {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) { micBtn.disabled = true; return null; }
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recog = new SpeechRecognition();
-    recog.continuous = false; recog.interimResults = true; recog.lang = 'en-US';
-    let finalTranscript = '';
-    recog.onresult = (event) => {
-      let interim = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
-        else interim += event.results[i][0].transcript;
+      } catch (error) {
+        typingDiv.remove();
+        showToast(`Error: ${error.message}`, 'error');
+        conv.messages.pop();
+        return false;
       }
-      userInput.value = finalTranscript + interim;
-      userInput.dispatchEvent(new Event('input'));
-    };
-    recog.onend = () => {
-      micBtn.classList.remove('listening'); isListening = false;
-      if (finalTranscript.trim()) handleSend();
-      finalTranscript = '';
-    };
-    recog.onerror = () => { micBtn.classList.remove('listening'); isListening = false; showToast("Voice error"); };
-    return recog;
-  }
-  function toggleListening() {
-    if (!recognition) { recognition = initSpeechRecognition(); if (!recognition) return; }
-    if (isListening) recognition.stop();
-    else { recognition.start(); micBtn.classList.add('listening'); isListening = true; }
-  }
-  micBtn.addEventListener('click', toggleListening);
-
-  // ======================== Settings Save/Load ========================
-  function saveAllSettings() {
-    localStorage.setItem('gemini_api_key', apiKeyInput.value);
-    localStorage.setItem('personality', personalitySelect.value);
-    localStorage.setItem('voice_name', voiceSelect.value);
-    localStorage.setItem('voice_pitch', voicePitch.value);
-    localStorage.setItem('voice_rate', voiceRate.value);
-    localStorage.setItem('auto_speak', autoSpeakToggle.checked);
-    localStorage.setItem('auto_scroll', autoScrollToggle.checked);
-    localStorage.setItem('dark_mode', darkModeToggle.checked);
-  }
-  function loadAllSettings() {
-    apiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
-    personalitySelect.value = localStorage.getItem('personality') || 'default';
-    if (localStorage.getItem('voice_name')) voiceSelect.value = localStorage.getItem('voice_name');
-    voicePitch.value = localStorage.getItem('voice_pitch') || '1.0';
-    voiceRate.value = localStorage.getItem('voice_rate') || '1.0';
-    autoSpeakToggle.checked = localStorage.getItem('auto_speak') !== 'false';
-    autoScrollToggle.checked = localStorage.getItem('auto_scroll') !== 'false';
-    darkModeToggle.checked = localStorage.getItem('dark_mode') !== 'false';
-    autoScroll = autoScrollToggle.checked;
-    // dark mode apply
-    document.body.classList.toggle('dark', darkModeToggle.checked);
-  }
-  // settings UI listeners
-  autoScrollToggle.addEventListener('change', (e) => { autoScroll = e.target.checked; saveAllSettings(); });
-  autoSpeakToggle.addEventListener('change', saveAllSettings);
-  darkModeToggle.addEventListener('change', () => { document.body.classList.toggle('dark', darkModeToggle.checked); saveAllSettings(); });
-  voicePitch.addEventListener('change', saveAllSettings);
-  voiceRate.addEventListener('change', saveAllSettings);
-  voiceSelect.addEventListener('change', saveAllSettings);
-  personalitySelect.addEventListener('change', saveAllSettings);
-  apiKeyInput.addEventListener('change', saveAllSettings);
-
-  // Clear data
-  clearDataBtn.addEventListener('click', () => {
-    if (confirm("Erase ALL conversations and settings?")) {
-      localStorage.clear();
-      indexedDB.deleteDatabase(DB_NAME);
-      location.reload();
     }
-  });
-  exportAllSettingsBtn.addEventListener('click', () => {
-    const data = {
-      settings: {
-        gemini_api_key: apiKeyInput.value,
-        personality: personalitySelect.value,
-        voice_name: voiceSelect.value,
-        voice_pitch: voicePitch.value,
-        voice_rate: voiceRate.value,
-        auto_speak: autoSpeakToggle.checked,
-        auto_scroll: autoScrollToggle.checked,
-        dark_mode: darkModeToggle.checked
-      },
-      messages: getCurrentMessages(),
-      pinned: localStorage.getItem('pinnedMessages')
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `nexus_backup_${Date.now()}.json`; a.click(); URL.revokeObjectURL(a.href);
-  });
-  importSettingsBtn.addEventListener('click', () => importSettingsFile.click());
-  importSettingsFile.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const text = await file.text();
-    try {
-      const data = JSON.parse(text);
-      if (data.settings) {
-        apiKeyInput.value = data.settings.gemini_api_key || '';
-        personalitySelect.value = data.settings.personality || 'default';
-        if (data.settings.voice_name) voiceSelect.value = data.settings.voice_name;
-        voicePitch.value = data.settings.voice_pitch || '1.0';
-        voiceRate.value = data.settings.voice_rate || '1.0';
-        autoSpeakToggle.checked = data.settings.auto_speak !== false;
-        autoScrollToggle.checked = data.settings.auto_scroll !== false;
-        darkModeToggle.checked = data.settings.dark_mode !== false;
-        saveAllSettings();
-      }
-      if (data.messages && Array.isArray(data.messages)) renderMessagesFromArray(data.messages);
-      if (data.pinned) localStorage.setItem('pinnedMessages', data.pinned);
-      showToast("Import complete");
-    } catch (err) { showToast("Invalid backup file"); }
-  });
 
-  // Drawer menu
-  menuBtn.addEventListener('click', () => drawer.classList.add('open'));
-  closeDrawerBtn.addEventListener('click', () => drawer.classList.remove('open'));
-  document.addEventListener('click', (e) => { if (drawer.classList.contains('open') && !drawer.contains(e.target) && !menuBtn.contains(e.target)) drawer.classList.remove('open'); });
+    function getSystemPrompt(personality) {
+      const prompts = {
+        default: 'You are a helpful, intelligent assistant.',
+        professional: 'You are a professional assistant. Provide clear, concise, and well-structured responses.',
+        creative: 'You are a creative assistant. Use imagination and unique perspectives in your responses.',
+        casual: 'You are a friendly and casual assistant. Use conversational language and be warm and approachable.'
+      };
+      return prompts[personality] || prompts.default;
+    }
 
-  // Simple To-Do and Notes modals
-  function showModal(title, contentHtml) {
-    const modal = document.createElement('div');
-    modal.style.position = 'fixed'; modal.style.top = '20%'; modal.style.left = '20%'; modal.style.width = '60%';
-    modal.style.background = '#0f1119'; modal.style.border = '1px solid #00f0ff'; modal.style.borderRadius = '32px';
-    modal.style.padding = '20px'; modal.style.zIndex = 2000; modal.style.backdropFilter = 'blur(20px)';
-    modal.innerHTML = `<h3>${title}</h3><div>${contentHtml}</div><button id="closeModalBtn" style="margin-top:12px;">Close</button>`;
-    document.body.appendChild(modal);
-    document.getElementById('closeModalBtn').onclick = () => modal.remove();
-  }
-  showTodosBtn.addEventListener('click', () => {
-    let todos = JSON.parse(localStorage.getItem('todoList') || '[]');
-    const listHtml = todos.map((t, i) => `<div><input type="checkbox" ${t.done ? 'checked' : ''} data-idx="${i}"> ${t.text} <button data-idx="${i}" class="del-todo">🗑️</button></div>`).join('');
-    const addForm = `<input type="text" id="newTodoText" placeholder="New task"><button id="addTodoBtn">Add</button>`;
-    const modalDiv = document.createElement('div');
-    modalDiv.innerHTML = `<div>${listHtml || 'No tasks'}</div>${addForm}`;
-    showModal("To-Do List", modalDiv.innerHTML);
-    // attach events after modal is shown
-    setTimeout(() => {
-      document.querySelectorAll('.del-todo').forEach(btn => btn.onclick = () => { todos.splice(parseInt(btn.dataset.idx),1); localStorage.setItem('todoList', JSON.stringify(todos)); location.reload(); });
-      document.getElementById('addTodoBtn')?.addEventListener('click', () => {
-        const newText = document.getElementById('newTodoText')?.value;
-        if(newText) { todos.push({ text: newText, done: false }); localStorage.setItem('todoList', JSON.stringify(todos)); location.reload(); }
+    // ======================== VOICE FEATURES ========================
+    function loadVoices() {
+      const voices = window.speechSynthesis.getVoices();
+      state.availableVoices = voices;
+      elements.voiceSelect.innerHTML = '';
+
+      voices.forEach(voice => {
+        const option = document.createElement('option');
+        option.value = voice.name;
+        option.textContent = `${voice.name} (${voice.lang})`;
+        elements.voiceSelect.appendChild(option);
       });
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.onchange = (e) => { todos[e.target.dataset.idx].done = e.target.checked; localStorage.setItem('todoList', JSON.stringify(todos)); });
-    }, 100);
-  });
-  showNotesBtn.addEventListener('click', () => {
-    let notes = localStorage.getItem('quickNotes') || '';
-    const editor = `<textarea id="notesArea" rows="6" style="width:100%; background:#0a0f1e; color:white; border-radius:16px;">${notes}</textarea><button id="saveNotesBtn">Save Notes</button>`;
-    showModal("Quick Notes", editor);
-    setTimeout(() => document.getElementById('saveNotesBtn')?.addEventListener('click', () => { localStorage.setItem('quickNotes', document.getElementById('notesArea').value); showToast("Notes saved"); }), 100);
-  });
 
-  // ======================== Initialization ========================
-  window.speechSynthesis.onvoiceschanged = () => { loadVoices(); };
-  loadVoices();
-  openDB().then(() => { loadAllSettings(); loadConversation(); }).catch(() => loadAllSettings());
-  sendBtn.addEventListener('click', handleSend);
-  userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } });
-  setInterval(() => persistMessages(), 8000);
-  // online status
-  function updateOnlineStatus() { statusBadge.innerHTML = navigator.onLine ? '<i class="fas fa-satellite-dish"></i> Online' : '<i class="fas fa-hdd"></i> Offline'; }
-  window.addEventListener('online', updateOnlineStatus);
-  window.addEventListener('offline', updateOnlineStatus);
-  updateOnlineStatus();
-</script>
+      const savedVoice = localStorage.getItem('voice');
+      if (savedVoice) {
+        elements.voiceSelect.value = savedVoice;
+      }
+    }
+
+    function speakText(text) {
+      if (state.isSpeaking) {
+        window.speechSynthesis.cancel();
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voice = state.availableVoices.find(v => v.name === elements.voiceSelect.value);
+
+      if (voice) utterance.voice = voice;
+      utterance.pitch = parseFloat(elements.pitchSlider.value);
+      utterance.rate = parseFloat(elements.speedSlider.value);
+      utterance.onstart = () => { state.isSpeaking = true; };
+      utterance.onend = () => { state.isSpeaking = false; };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function initSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast('Speech recognition not supported', 'error');
+        return null;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      let finalTranscript = '';
+
+      recognition.onstart = () => {
+        state.isListening = true;
+        elements.voiceBtn.classList.add('listening');
+      };
+
+      recognition.onresult = (event) => {
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        elements.messageInput.value = finalTranscript + interimTranscript;
+        autoResizeTextarea(elements.messageInput);
+      };
+
+      recognition.onend = () => {
+        state.isListening = false;
+        elements.voiceBtn.classList.remove('listening');
+        if (finalTranscript.trim()) {
+          elements.messageInput.value = finalTranscript;
+          handleSend();
+        }
+      };
+
+      recognition.onerror = () => {
+        state.isListening = false;
+        elements.voiceBtn.classList.remove('listening');
+        showToast('Voice recognition error', 'error');
+      };
+
+      return recognition;
+    }
+
+    let voiceRecognition = null;
+
+    // ======================== EVENT LISTENERS ========================
+    elements.sendBtn.addEventListener('click', handleSend);
+    elements.messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+    elements.messageInput.addEventListener('input', () => {
+      autoResizeTextarea(elements.messageInput);
+    });
+
+    elements.voiceBtn.addEventListener('click', () => {
+      if (!voiceRecognition) {
+        voiceRecognition = initSpeechRecognition();
+      }
+      if (voiceRecognition) {
+        if (state.isListening) {
+          voiceRecognition.stop();
+        } else {
+          voiceRecognition.start();
+        }
+      }
+    });
+
+    elements.newChatBtn.addEventListener('click', createNewConversation);
+
+    elements.settingsBtn.addEventListener('click', () => {
+      elements.settingsModal.classList.add('active');
+    });
+
+    elements.closeSettingsBtn.addEventListener('click', () => {
+      elements.settingsModal.classList.remove('active');
+    });
+
+    elements.settingsModal.addEventListener('click', (e) => {
+      if (e.target === elements.settingsModal) {
+        elements.settingsModal.classList.remove('active');
+      }
+    });
+
+    elements.themeToggleBtn.addEventListener('click', () => {
+      state.isDarkMode = !state.isDarkMode;
+      document.body.classList.toggle('dark', state.isDarkMode);
+      localStorage.setItem('darkMode', state.isDarkMode);
+      elements.themeLabel.textContent = state.isDarkMode ? 'Light Mode' : 'Dark Mode';
+    });
+
+    elements.pitchSlider.addEventListener('input', (e) => {
+      elements.pitchValue.textContent = parseFloat(e.target.value).toFixed(1);
+      localStorage.setItem('pitch', e.target.value);
+    });
+
+    elements.speedSlider.addEventListener('input', (e) => {
+      elements.speedValue.textContent = parseFloat(e.target.value).toFixed(1);
+      localStorage.setItem('speed', e.target.value);
+    });
+
+    elements.voiceSelect.addEventListener('change', (e) => {
+      localStorage.setItem('voice', e.target.value);
+    });
+
+    elements.personalitySelect.addEventListener('change', (e) => {
+      localStorage.setItem('personality', e.target.value);
+    });
+
+    elements.apiKeyInput.addEventListener('change', (e) => {
+      localStorage.setItem('apiKey', e.target.value);
+    });
+
+    elements.autoSpeakToggle.addEventListener('change', (e) => {
+      localStorage.setItem('autoSpeak', e.target.checked);
+    });
+
+    elements.autoScrollToggle.addEventListener('change', (e) => {
+      localStorage.setItem('autoScroll', e.target.checked);
+    });
+
+    elements.previewVoiceBtn.addEventListener('click', () => {
+      speakText('This is a preview of your voice settings. Adjust the pitch and speed to your preference.');
+    });
+
+    elements.exportBtn.addEventListener('click', () => {
+      const conv = state.conversations.find(c => c.id === state.currentConversationId);
+      if (!conv) return;
+
+      const data = JSON.stringify(conv, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `chat_${conv.id}_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Chat exported successfully', 'success');
+    });
+
+    elements.importBtn.addEventListener('click', () => {
+      elements.importFile.click();
+    });
+
+    elements.importFile.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+
+        if (data.messages && Array.isArray(data.messages)) {
+          const id = Date.now().toString();
+          const conv = {
+            id,
+            title: data.title || 'Imported Chat',
+            messages: data.messages,
+            created: data.created || Date.now(),
+            updated: Date.now()
+          };
+          await saveConversation(conv);
+          state.conversations.unshift(conv);
+          selectConversation(id);
+          updateConversationsList();
+          showToast('Chat imported successfully', 'success');
+        }
+      } catch (error) {
+        showToast('Failed to import chat', 'error');
+      }
+      elements.importFile.value = '';
+    });
+
+    elements.clearDataBtn.addEventListener('click', () => {
+      if (confirm('This will delete all conversations and settings. This action cannot be undone.')) {
+        localStorage.clear();
+        indexedDB.deleteDatabase(CONFIG.dbName);
+        location.reload();
+      }
+    });
+
+    elements.mobileSidebarBtn.addEventListener('click', () => {
+      elements.sidebar.classList.toggle('open');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!elements.sidebar.contains(e.target) && !elements.mobileSidebarBtn.contains(e.target)) {
+        elements.sidebar.classList.remove('open');
+      }
+    });
+
+    // ======================== INITIALIZATION ========================
+    async function init() {
+      // Load stored settings
+      elements.apiKeyInput.value = localStorage.getItem('apiKey') || '';
+      elements.personalitySelect.value = localStorage.getItem('personality') || 'default';
+      elements.pitchSlider.value = localStorage.getItem('pitch') || '1';
+      elements.speedSlider.value = localStorage.getItem('speed') || '1';
+      elements.pitchValue.textContent = elements.pitchSlider.value;
+      elements.speedValue.textContent = elements.speedSlider.value;
+      elements.autoSpeakToggle.checked = localStorage.getItem('autoSpeak') !== 'false';
+      elements.autoScrollToggle.checked = localStorage.getItem('autoScroll') !== 'false';
+
+      // Apply theme
+      if (state.isDarkMode) {
+        document.body.classList.add('dark');
+        elements.themeLabel.textContent = 'Light Mode';
+      }
+
+      // Load voices
+      if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+      }
+      loadVoices();
+
+      // Load conversations
+      await openDB();
+      await loadConversations();
+      updateConversationsList();
+
+      // Open last conversation or create new one
+      const lastConvId = localStorage.getItem('lastConversation');
+      if (lastConvId && state.conversations.find(c => c.id === lastConvId)) {
+        selectConversation(lastConvId);
+      } else {
+        createNewConversation();
+      }
+
+      // Status indicator
+      const updateStatus = () => {
+        const isOnline = navigator.onLine;
+        elements.statusBadge.className = `status-badge ${isOnline ? '' : 'offline'}`;
+        elements.statusBadge.innerHTML = `
+          <i class="fas fa-dot-circle"></i>
+          <span>${isOnline ? 'Connected' : 'Offline'}</span>
+        `;
+      };
+      window.addEventListener('online', updateStatus);
+      window.addEventListener('offline', updateStatus);
+      updateStatus();
+    }
+
+    async function handleSend() {
+      const message = elements.messageInput.value.trim();
+      if (!message) return;
+
+      elements.messageInput.value = '';
+      elements.messageInput.style.height = 'auto';
+      await sendMessage(message);
+    }
+
+    init();
+  </script>
 </body>
 </html>
